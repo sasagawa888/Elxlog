@@ -1,7 +1,8 @@
-Small pure Prolog intepreter in Elixir
+Small pure Prolog intepreter in Elixir.
+Project is called Elxlog.
 
 invoke:
-  mix prolog
+  mix elxlog
 
 quit: halt.
 
