@@ -7,7 +7,7 @@ defmodule Elxlog do
   defp repl1(def) do
     try do
       IO.write("?- ")
-      {s,_} = Read.parse([])
+      {s,_} = Read.parse([],:stdin)
       s1 = add_ask(s)
       {s2,_,def1} = Prove.prove_all(s1,[],def,1)
       Print.print(s2)

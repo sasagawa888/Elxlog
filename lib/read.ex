@@ -13,7 +13,7 @@ defmodule Read do
 
   def is_builtin_str(x) do
     Enum.member?(["assert","halt","write","nl","is","listing","ask","debug",
-                  "atom","atomic","integer","float","number",
+                  "atom","atomic","integer","float","number","reconsult",
                   ":-",">","<","=>","=<"],x)
   end
 
@@ -35,21 +35,21 @@ defmodule Read do
     Enum.member?([:is,:=,:"=..",:==,:"=>",:"=<",:>,:<,:^],x)
   end
 
-  def parse(buf) do
-    {s1,buf1} = read(buf)
-    {s2,buf2} = read(buf1)
-    if s2 == :. do {s1,[]}
+  def parse(buf,stream) do
+    {s1,buf1} = read(buf,stream)
+    {s2,buf2} = read(buf1,stream)
+    if s2 == :. do {s1,buf2}
     else if s2 == :":-" do
-      {s3,buf3} = parse1(buf2,[])
+      {s3,buf3} = parse1(buf2,[],stream)
       {[:clause,s1,s3],buf3}
     else if s2 == :',' do
-      {s3,buf3} = parse1(buf2,[s1])
+      {s3,buf3} = parse1(buf2,[s1],stream)
       {s3,buf3}
     else if is_infix_builtin(s2) do
-      {s3,buf3,status} = parse2([],[],buf2)
+      {s3,buf3,status} = parse2([],[],buf2,stream)
       cond do
         status == :. -> {[:builtin,[s2,s1,s3]],buf3}
-        status == :"," -> parse1(buf3,[[:builtin,[s2,s1,s3]]])
+        status == :"," -> parse1(buf3,[[:builtin,[s2,s1,s3]]],stream)
         true -> throw "error parse1"
       end
     else
@@ -60,19 +60,19 @@ defmodule Read do
     end
   end
 
-  def parse1(buf,res) do
-    {s1,buf1} = read(buf)
-    {s2,buf2} = read(buf1)
+  def parse1(buf,res,stream) do
+    {s1,buf1} = read(buf,stream)
+    {s2,buf2} = read(buf1,stream)
     if s2 == :. do
       {res++[s1],buf2}
     else if s2 == :")" do
       {res++[s1],buf2}
     else if s2 == :"," do
-      parse1(buf2,res++[s1])
+      parse1(buf2,res++[s1],stream)
     else if is_infix_builtin(s2) do
-      {s3,buf3,status} = parse2([],[],buf2)
+      {s3,buf3,status} = parse2([],[],buf2,stream)
       if status == :"," do
-        parse1(buf3,[[:builtin,[s2,s1,s3]]])
+        parse1(buf3,[[:builtin,[s2,s1,s3]]],stream)
       else if status == :. do
         {res++[[:builtin,[s2,s1,s3]]],buf3}
       else if status == :")" do
@@ -89,52 +89,52 @@ defmodule Read do
   end
 
   # parse formula
-  def parse2([],[],buf) do
+  def parse2([],[],buf,stream) do
     #IO.inspect binding()
-    {s,buf1} = read(buf)
+    {s,buf1} = read(buf,stream)
     cond do
       s == :. -> throw "error 21"
-      is_func_atom(s) -> parse2([],[s],buf1)
-      true -> parse2([s],[],buf1)
+      is_func_atom(s) -> parse2([],[s],buf1,stream)
+      true -> parse2([s],[],buf1,stream)
     end
   end
-  def parse2([o1],[],buf) do
+  def parse2([o1],[],buf,stream) do
     #IO.inspect binding()
-    {s,buf1} = read(buf)
+    {s,buf1} = read(buf,stream)
     cond do
       s == :. -> {o1,buf1,:.}
       s == :"," -> {o1,buf1,:","}
-      is_func_atom(s) -> parse2([o1],[s],buf1)
+      is_func_atom(s) -> parse2([o1],[s],buf1,stream)
       true -> throw "error 22"
     end
   end
-  def parse2([o1],[f1],buf) do
+  def parse2([o1],[f1],buf,stream) do
     #IO.inspect binding()
-    {s,buf1} = read(buf)
+    {s,buf1} = read(buf,stream)
     cond do
       is_func_atom(s) -> throw "error 23"
-      true -> parse2([s,o1],[f1],buf1)
+      true -> parse2([s,o1],[f1],buf1,stream)
     end
   end
-  def parse2([o1,o2],[f1],buf) do
+  def parse2([o1,o2],[f1],buf,stream) do
     #IO.inspect binding()
-    {s,buf1} = read(buf)
+    {s,buf1} = read(buf,stream)
     cond do
       s == :. -> {[:formula,[f1,o2,o1]],buf1,:.}
       s == :"," -> {[:formula,[f1,o2,o1]],buf1,:","}
       s == :")" -> {[:formula,[f1,o2,o1]],buf1,:")"}
-      is_func_atom(s) && weight(s)>=weight(f1) -> parse2([[f1,o2,o1]],[s],buf1)
-      is_func_atom(s) && weight(s)<weight(f1) -> parse2([o1,o2],[s,f1],buf1)
+      is_func_atom(s) && weight(s)>=weight(f1) -> parse2([[f1,o2,o1]],[s],buf1,stream)
+      is_func_atom(s) && weight(s)<weight(f1) -> parse2([o1,o2],[s,f1],buf1,stream)
       true -> throw "error 24"
     end
   end
-  def parse2([o1,o2],[f1,f2],buf) do
+  def parse2([o1,o2],[f1,f2],buf,stream) do
     #IO.inspect binding()
-    {s,buf1} = read(buf)
+    {s,buf1} = read(buf,stream)
     cond do
       s == :.  -> throw "Error 25"
       is_func_atom(s) -> throw "error 26"
-      true -> parse2([[f2,o2,[f1,o1,s]]],[],buf1)
+      true -> parse2([[f2,o2,[f1,o1,s]]],[],buf1,stream)
     end
   end
 
@@ -143,31 +143,35 @@ defmodule Read do
   defp weight(:*) do 50 end
   defp weight(:/) do 50 end
 
-  def read([]) do
-    buf = IO.gets("") |> comment_line |> drop_eol |> tokenize
-    read(buf)
+  def read([],stream) do
+    if stream == :stdin do
+      buf = IO.gets("") |> tokenize
+      read(buf,stream)
+    else
+      []
+    end
   end
-  def read([""|xs]) do
-    read(xs)
+  def read([""|xs],stream) do
+    read(xs,stream)
   end
-  def read(["."|xs]) do
+  def read(["."|xs],_) do
     {:.,xs}
   end
-  def read([")"|xs]) do
+  def read([")"|xs],_) do
     {:")",xs}
   end
-  def read(["["|xs]) do
-    read_list(xs,[])
+  def read(["["|xs],stream) do
+    read_list(xs,[],stream)
   end
-  def read([x,"("|xs]) do
-    {tuple,rest} = read_tuple(xs,[])
+  def read([x,"("|xs],stream) do
+    {tuple,rest} = read_tuple(xs,[],stream)
     cond do
       is_builtin_str(x) -> {[:builtin,[String.to_atom(x)|tuple]],rest}
       is_func_str(x) -> {[String.to_atom(x)|tuple],rest}
       true -> {[:pred,[String.to_atom(x)|tuple]],rest}
     end
   end
-  def read([x,"."|_]) do
+  def read([x,"."|_],_) do
     cond do
       is_builtin_str(x) -> {[:builtin,[String.to_atom(x)]],["."]}
       is_atom_str(x) -> {[:pred,[String.to_atom(x)]],["."]}
@@ -177,7 +181,7 @@ defmodule Read do
       true -> {String.to_atom(x),["."]}
     end
   end
-  def read([x,","|xs]) do
+  def read([x,","|xs],_) do
     cond do
       is_builtin_str(x) -> {[:builtin,[String.to_atom(x)]],[","|xs]}
       is_atom_str(x) -> {[:pred,[String.to_atom(x)]],[","|xs]}
@@ -187,7 +191,7 @@ defmodule Read do
       true -> {x,[","|xs]}
     end
   end
-  def read([x|xs]) do
+  def read([x|xs],_) do
     cond do
       is_integer_str(x) -> {String.to_integer(x),xs}
       is_float_str(x) -> {String.to_float(x),xs}
@@ -205,69 +209,101 @@ defmodule Read do
   end
 
 
-  defp read_list([],ls) do
-    buf = IO.gets("") |> comment_line |> drop_eol |> tokenize
-    read_list(buf,ls)
+  defp read_list([],ls,stream) do
+    if stream == :stdin do
+      buf = IO.gets("") |> tokenize
+      read_list(buf,ls,stream)
+    else
+      throw "Error read list"
+    end
   end
-  defp read_list(["]"|xs],ls) do
+  defp read_list(["]"|xs],ls,_) do
     {ls,xs}
   end
-  defp read_list(["["|xs],ls) do
-    {s,rest} = read_list(xs,[])
-    read_list(rest,ls++[s])
+  defp read_list(["["|xs],ls,stream) do
+    {s,rest} = read_list(xs,[],stream)
+    read_list(rest,ls++[s],stream)
   end
-  defp read_list([""|xs],ls) do
-    read_list(xs,ls)
+  defp read_list([""|xs],ls,stream) do
+    read_list(xs,ls,stream)
   end
-  defp read_list([x,"|"|xs],ls) do
+  defp read_list([x,"|"|xs],ls,stream) do
     s = read1(x)
-    {s1,rest} = read_list(xs,[])
+    {s1,rest} = read_list(xs,[],stream)
     {ls++[s]++hd(s1),rest}
   end
-  defp read_list([x,","|xs],ls) do
+  defp read_list([x,","|xs],ls,stream) do
     s = read1(x)
-    read_list(xs,ls++[s])
+    read_list(xs,ls++[s],stream)
   end
-  defp read_list([x,"]",","|xs],ls) do
+  defp read_list([x,"]",","|xs],ls,_) do
     s = read1(x)
     {ls++[s],xs}
   end
-  defp read_list([x,"]"|xs],ls) do
+  defp read_list([x,"]"|xs],ls,_) do
     s = read1(x)
     {ls++[s],xs}
   end
 
-  defp read_tuple([],ls) do
-    buf = IO.gets("") |> comment_line |> drop_eol |> tokenize
-    read_tuple(buf,ls)
+  defp read_tuple([],ls,stream) do
+    if stream == :stdin do
+      buf = IO.gets("") |> tokenize
+      read_tuple(buf,ls,stream)
+    else
+      throw "Error read tuple"
+    end
   end
-  defp read_tuple([")"|xs],ls) do
+  defp read_tuple([")"|xs],ls,_) do
     {ls,xs}
   end
-  defp read_tuple(["("|xs],ls) do
-    {s,rest} = parse(xs)
-    read_tuple(rest,ls++[s])
+  defp read_tuple(["("|xs],ls,stream) do
+    {s,rest} = parse(xs,stream)
+    read_tuple(rest,ls++[s],stream)
   end
-  defp read_tuple([""|xs],ls) do
-    read_tuple(xs,ls)
+  defp read_tuple([""|xs],ls,stream) do
+    read_tuple(xs,ls,stream)
   end
-  defp read_tuple([","|xs],ls) do
-    read_tuple(xs,ls)
+  defp read_tuple([","|xs],ls,stream) do
+    read_tuple(xs,ls,stream)
   end
-  defp read_tuple(x,ls) do
-    {s,rest} = read(x)
-    read_tuple(rest,ls++[s])
+  defp read_tuple(x,ls,stream) do
+    {s,rest} = read(x,stream)
+    read_tuple(rest,ls++[s],stream)
   end
 
 
-  defp tokenize(str) do
+  def tokenize(str) do
     str |> String.to_charlist |> tokenize1([],[])
   end
 
+  defp tokenize1([],[],res) do
+    Enum.reverse(res)
+  end
   defp tokenize1([],token,res) do
     token1 = Enum.reverse(token) |> List.to_string
     res1 = [token1|res]
     Enum.reverse(res1)
+  end
+  # LF
+  defp tokenize1([10|ls],[],res) do
+    tokenize1(ls,[],res)
+  end
+  defp tokenize1([10|ls],token,res) do
+    token1 = token |> Enum.reverse |> List.to_string
+    tokenize1(ls,[],[token1|res])
+  end
+  # CR
+  defp tokenize1([13|ls],[],res) do
+    tokenize1(ls,[],res)
+  end
+  defp tokenize1([13|ls],token,res) do
+    token1 = token |> Enum.reverse |> List.to_string
+    tokenize1(ls,[],[token1|res])
+  end
+  # comment %
+  defp tokenize1([37|ls],[],res) do
+    ls1 = comment_skip(ls)
+    tokenize1(ls1,[],res)
   end
   #space
   defp tokenize1([32,32|ls],token,res) do
@@ -382,16 +418,15 @@ defmodule Read do
     tokenize1(ls,[l|token],res)
   end
 
-  defp comment_line(x) do
-    if String.slice(x,0,1) == ";" do
-      IO.gets("? ")
-    else
-      x
-    end
+  defp comment_skip([]) do [] end
+  defp comment_skip([10|ls]) do
+    ls
   end
-
-  defp drop_eol(x) do
-    String.split(x,"\n") |> hd
+  defp comment_skip([13|ls]) do
+    ls
+  end
+  defp comment_skip([_|ls]) do
+    comment_skip(ls)
   end
 
   defp quote_token([],_) do

@@ -103,6 +103,12 @@ defmodule Prove do
     IO.puts("")
     prove_all(y,env,def,n+1)
   end
+  def prove_builtin([:reconsult,x],y,env,def,n) do
+    {:ok,string} = File.read(Atom.to_string(x))
+    buf = string |> Read.tokenize()
+    def1 = reconsult(buf,def)
+    prove_all(y,env,def1,n+1)
+  end
   def prove_builtin([:assert,x],y,env,def,n) do
     if Elxlog.is_pred(x) do
       [_,[name|_]] = x
@@ -233,6 +239,13 @@ defmodule Prove do
     IO.write(" = ")
     Print.print(deref(x,env))
     ask(xs,env)
+  end
+
+  def reconsult([],def) do def end
+  def reconsult(buf,def) do
+    {s,buf1} = Read.parse(buf,:stdin)
+    {_,_,def1} = Prove.prove(s,[],[],def,1)
+    reconsult(buf1,def1)
   end
 
   def listing([],_) do true end

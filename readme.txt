@@ -13,6 +13,7 @@ builtin:
   number/1
   write/1
   nl/0
+  reconsult/1
   assert/1
   is/2
   =/2
