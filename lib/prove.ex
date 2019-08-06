@@ -94,6 +94,22 @@ defmodule Prove do
       {false,env,def}
     end
   end
+  def prove_builtin([:var,x],y,env,def,n) do
+    x1 = deref(x,env)
+    if Elxlog.is_var(x1) do
+      prove_all(y,env,def,n+1)
+    else
+      {false,env,def}
+    end
+  end
+  def prove_builtin([:nonvar,x],y,env,def,n) do
+    x1 = deref(x,env)
+    if !Elxlog.is_var(x1) do
+      prove_all(y,env,def,n+1)
+    else
+      {false,env,def}
+    end
+  end
   def prove_builtin([:write,x],y,env,def,n) do
     x1 = deref(x,env)
     Print.print1(x1)

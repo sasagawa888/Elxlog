@@ -12,9 +12,11 @@ builtin:
   integer/1
   float/1
   number/1
+  var/1
+  nonvar/1
   write/1
   nl/0
-  reconsult/1
+  reconsult/1  (['filename.pl'])
   assert/1
   is/2
   =/2

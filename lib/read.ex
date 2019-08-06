@@ -13,7 +13,7 @@ defmodule Read do
 
   def is_builtin_str(x) do
     Enum.member?(["assert","halt","write","nl","is","listing","ask","debug",
-                  "atom","atomic","integer","float","number","reconsult",
+                  "atom","atomic","integer","float","number","reconsult","var","nonvar",
                   ":-",">","<","=>","=<"],x)
   end
 
@@ -38,7 +38,12 @@ defmodule Read do
   def parse(buf,stream) do
     {s1,buf1} = read(buf,stream)
     {s2,buf2} = read(buf1,stream)
-    if s2 == :. do {s1,buf2}
+    if s2 == :. do
+      if !Elxlog.is_pred(s1) && !Elxlog.is_builtin(s1) do
+        {[:builtin,[:reconsult|s1]],buf2}
+      else
+        {s1,buf2}
+      end
     else if s2 == :":-" do
       {s3,buf3} = parse1(buf2,[],stream)
       {[:clause,s1,s3],buf3}
