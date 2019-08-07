@@ -21,6 +21,20 @@ defmodule Read do
     Enum.member?(["+","-","*","/","^"],x)
   end
 
+  def is_elixir_func_str(x) do
+    if String.at(x,0) == "e" && String.at(x,1) == "l" && String.at(x,2) == "x" &&
+       String.at(x,3) == "_" do
+      true
+    else
+      false
+    end
+  end
+
+  def elixir_name(x) do
+    {_,name} = String.split_at(x,4)
+    name
+  end
+
   def is_var_str(x) do
     x1 = String.at(x,0)
     Enum.member?(["_","A","B","C","D","E","F","G","H","I","j","K","L","M","N",
@@ -173,6 +187,7 @@ defmodule Read do
     cond do
       is_builtin_str(x) -> {[:builtin,[String.to_atom(x)|tuple]],rest}
       is_func_str(x) -> {[String.to_atom(x)|tuple],rest}
+      is_elixir_func_str(x) -> {[:func,[String.to_atom(elixir_name(x))|tuple]],rest}
       true -> {[:pred,[String.to_atom(x)|tuple]],rest}
     end
   end

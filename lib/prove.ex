@@ -225,6 +225,10 @@ defmodule Prove do
   def eval([:formula,x],env) do
     eval(x,env)
   end
+  def eval([:func,x],env) do
+    {x1,_} = Code.eval_string(func_to_str(x),env,__ENV__)
+    eval(x1,env)
+  end
   def eval([:+,x,y],env) do
     eval(x,env) + eval(y,env)
   end
@@ -242,6 +246,30 @@ defmodule Prove do
   end
   def eval(x,env) do
     deref(x,env)
+  end
+
+  def func_to_str([name|args]) do
+    ["Elxfunc."]++[Atom.to_string(name)]++[list_to_str(args)] |> Enum.join()
+  end
+
+  def list_to_str(x) do
+    ["("]++list_to_str1(x)++[")"]
+  end
+
+  def list_to_str1([]) do [""] end
+  def list_to_str1([x]) do
+    cond do
+      is_integer(x) -> [Integer.to_string(x)]
+      is_float(x) -> [Float.to_string(x)]
+      is_atom(x) -> [Atom.to_string(x)]
+    end
+  end
+  def list_to_str1([x|xs]) do
+    cond do
+      is_integer(x) -> [Integer.to_string(x)]++[","]++list_to_str1(xs)
+      is_float(x) -> [Float.to_string(x)]++[","]++list_to_str1(xs)
+      is_atom(x) -> [Atom.to_string(x)]++[","]++list_to_str1(xs)
+    end
   end
 
   def ask([],_) do true end
