@@ -1,5 +1,6 @@
 Small pure Prolog intepreter in Elixir.
 Project is called Elxlog.
+Goal: Fusion of Elixir and Prolog
 
 invoke:
   mix elxlog
@@ -28,8 +29,10 @@ builtin:
   =</2
   halt/0
   listing/0
+  elixir/1  Run the Elixir code. See function.ex (e.g. elixir(elx_in_the_park()) )
 formula:
   +,^,*,/,^
+  prefix "elx_" means Elixir function. See function.ex
 
 Example:
 mix prolog
