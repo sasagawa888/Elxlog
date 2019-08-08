@@ -139,6 +139,14 @@ defmodule Prove do
       prove_all(y,env,def2,n+1)
     end
   end
+  def prove_builtin([:elixir,[:func,x]],y,env,def,n) do
+      {x1,_} = Code.eval_string(func_to_str(x),[],__ENV__)
+      if x1 == true do
+        prove_all(y,env,def,n+1)
+      else
+        {false,env,def}
+      end
+  end
   def prove_builtin([:is,a,b],y,env,def,n) do
     b1 = eval(b,env)
     env1 = unify(a,b1,env)
@@ -208,6 +216,12 @@ defmodule Prove do
       true -> prove_all(y,env,def,n+1)
     end
   end
+  def prove_builtin([:true],y,env,def,n) do
+    prove_all(y,env,def,n+1)
+  end
+  def prove_builtin([:fail],_,env,def,_) do
+    {false,env,def}
+  end
   def prove_builtin(x,_,_,_,_) do
     IO.inspect(x)
     throw "error builtin"
@@ -226,7 +240,7 @@ defmodule Prove do
     eval(x,env)
   end
   def eval([:func,x],env) do
-    {x1,_} = Code.eval_string(func_to_str(x),env,__ENV__)
+    {x1,_} = Code.eval_string(func_to_str(x),[],__ENV__)
     eval(x1,env)
   end
   def eval([:+,x,y],env) do

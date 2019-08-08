@@ -11,4 +11,13 @@ defmodule Elxfunc do
     end
   end
 
+  def in_the_park() do
+    if :rand.uniform(2) == 1 do
+      IO.puts("woof")
+    else
+      IO.puts("ruff")
+    end
+    in_the_park()
+  end
+
 end

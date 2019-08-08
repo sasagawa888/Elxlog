@@ -14,6 +14,8 @@ builtin:
   number/1
   var/1
   nonvar/1
+  true/0
+  fail/0
   write/1
   nl/0
   reconsult/1  (['filename.pl'])
