@@ -2,10 +2,13 @@ Small pure Prolog intepreter in Elixir.
 Project is called Elxlog.
 Goal: Fusion of Elixir and Prolog
 
+caution: predicate without zero arity is written like this:
+ e.g. halt()  true()  fail()
+
 invoke:
   mix elxlog
 
-quit: halt.
+quit: halt().
 
 builtin:
   atom/1
@@ -17,10 +20,12 @@ builtin:
   nonvar/1
   true/0
   fail/0
+  not/1
   write/1
   nl/0
   reconsult/1  (['filename.pl'])
   assert/1
+  between/3
   is/2
   =/2
   </2

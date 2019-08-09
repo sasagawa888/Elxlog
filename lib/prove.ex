@@ -222,6 +222,14 @@ defmodule Prove do
   def prove_builtin([:fail],_,env,def,_) do
     {false,env,def}
   end
+  def prove_builtin([:not,a],y,env,def,n) do
+    {res,_,_} = prove(a,y,env,def,n)
+    if res == true do
+      {false,env,def}
+    else
+      prove_all(y,env,def,n+1)
+    end
+  end
   def prove_builtin([:between,a,b,c],y,env,def,n) do
     a1 = deref(a,env)
     b1 = deref(b,env)
