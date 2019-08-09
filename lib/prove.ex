@@ -222,6 +222,20 @@ defmodule Prove do
   def prove_builtin([:fail],_,env,def,_) do
     {false,env,def}
   end
+  def prove_builtin([:between,a,b,c],y,env,def,n) do
+    a1 = deref(a,env)
+    b1 = deref(b,env)
+    if a1 > b1 do
+      {false,env,def}
+    else
+      env1 = unify(c,a1,env)
+      if prove_all(y,env1,def,n+1) == true do
+        {true,env1,def}
+      else
+        prove_builtin([:between,a1+1,b1,c],y,env,def,n)
+      end
+    end
+  end
   def prove_builtin(x,_,_,_,_) do
     IO.inspect(x)
     throw "error builtin"
