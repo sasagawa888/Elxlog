@@ -2,7 +2,7 @@ Small pure Prolog intepreter in Elixir.
 Project is called Elxlog.
 Goal: Fusion of Elixir and Prolog
 
-caution: predicate without zero arity is written like this:
+caution: predicate with zero arity is written like this:
  e.g. halt()  true()  fail()
 
 invoke:
