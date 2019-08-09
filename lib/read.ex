@@ -92,7 +92,7 @@ defmodule Read do
     else if is_infix_builtin(s2) do
       {s3,buf3,status} = parse2([],[],buf2,stream)
       if status == :"," do
-        parse1(buf3,[[:builtin,[s2,s1,s3]]],stream)
+        parse1(buf3,res++[[:builtin,[s2,s1,s3]]],stream)
       else if status == :. do
         {res++[[:builtin,[s2,s1,s3]]],buf3}
       else if status == :")" do
@@ -124,8 +124,9 @@ defmodule Read do
     cond do
       s == :. -> {o1,buf1,:.}
       s == :"," -> {o1,buf1,:","}
+      s == :")" -> {o1,buf1,:")"}
       is_func_atom(s) -> parse2([o1],[s],buf1,stream)
-      true -> throw "error 22"
+      true -> throw "error 22 #{o1} #{s}"
     end
   end
   def parse2([o1],[f1],buf,stream) do
