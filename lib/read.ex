@@ -379,11 +379,19 @@ defmodule Read do
     tokenize1(ls,[],[",",token1|res])
   end
   defp tokenize1([46|ls],[],res) do
-    tokenize1(ls,[],["."|res])
+    if ls == [10] do
+      Enum.reverse(["."|res])
+    else
+      tokenize1(ls,[46],res)
+    end
   end
   defp tokenize1([46|ls],token,res) do
-    token1 = token |> Enum.reverse |> List.to_string
-    tokenize1(ls,[],[".",token1|res])
+    if ls == [10] do
+      token1 = token |> Enum.reverse |> List.to_string
+      Enum.reverse([".",token1|res])
+    else
+      tokenize1(ls,[46|token],res)
+    end
   end
   defp tokenize1([43|ls],[],res) do
     tokenize1(ls,[],["+"|res])
