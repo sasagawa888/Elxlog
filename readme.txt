@@ -50,38 +50,29 @@ formula:
 Example:
 mix prolog
 Compiling 1 file (.ex)
-Prolog in Elixir
-?- assert(fact(0,1)).
+Elxlog ver0.XX
+?- ['test.pl'].
 true
-?- assert((fact(N,A) :- N1 is N-1,fact(N1,A1),A is N*A1)).
-true
-?- fact(10,X).
-X = 3628800
-true
-?-
-
-?- assert(likes(kim,robin)).
-true
-?- assert(likes(sandy,lee)).
-true
-?- assert(likes(sandy,kim)).
-true
-?- assert(likes(robin,cats)).
-true
-?- assert((likes(sandy,X) :- likes(X,cats))).
-true
-?- assert((likes(kim,X) :- likes(X,lee),likes(X,kim))).
-true
-?- assert(likes(X,X)).
-true
-?- listing.
+?- listing().
+fact(0,1)
+fact(N,A) :- is(N1,N-1),fact(N1,A1),is(A,N*A1).
 likes(kim,robin)
 likes(sandy,lee)
 likes(sandy,kim)
 likes(robin,cats)
-likes(sandy,X) :- likes(X,cats)
-likes(kim,X) :- likes(X,lee)likes(X,kim)
+likes(sandy,X) :- likes(X,cats).
+likes(kim,X) :- likes(X,lee),likes(X,kim).
 likes(X,X)
+append([],Xs,Xs)
+append([X,|Ls],Ys,[X,|Zs]) :- append(Ls,Ys,Zs).
+bet(N,M,K) :- =<(N,M),=(K,N).
+bet(N,M,K) :- <(N,M),is(N1,N+1),bet(N1,M,K).
+true
+?- X is elx_ack(3,11).
+X = 16381
+true
+?- fact(10,X).
+X = 3628800
 true
 ?- likes(sandy,Who).
 Who = lee;
@@ -91,11 +82,6 @@ Who = sandy;
 Who = cats;
 Who = sandy;
 false
-
-?- assert(append([], Xs, Xs)).
-true
-?- assert((append([X | Ls], Ys, [X | Zs]) :- append(Ls, Ys, Zs))).
-true
 ?- append(X,Y,[1,2,3]).
 X = []
 Y = [1,2,3];
@@ -106,6 +92,5 @@ Y = [3];
 X = [1,2,3]
 Y = [];
 false
-
-?-halt.
+?- halt().
 goodbye
