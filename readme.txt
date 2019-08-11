@@ -11,7 +11,7 @@ caution:
  comma and period is delimiter. Not operator.
 
  Elixir code can be mixed in the file read by reconsult/1.
- The line after g!Elixirh is Elixir code. see test.pl
+ The line after "!Elixir" is Elixir code. see test.pl
 
 invoke:
   mix elxlog
