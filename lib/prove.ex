@@ -120,7 +120,10 @@ defmodule Prove do
     prove_all(y,env,def,n+1)
   end
   def prove_builtin([:reconsult,x],y,env,def,n) do
-    {:ok,string} = File.read(Atom.to_string(x))
+    {status,string} = File.read(Atom.to_string(x))
+    if status == :error do
+      throw "Error reconsult"
+    end
     codelist = String.split(string,"!elixir")
     buf = hd(codelist) |> Read.tokenize(:filein)
     def1 = reconsult(buf,def)
