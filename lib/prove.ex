@@ -122,7 +122,7 @@ defmodule Prove do
   def prove_builtin([:reconsult,x],y,env,def,n) do
     {:ok,string} = File.read(Atom.to_string(x))
     codelist = String.split(string,"!elixir")
-    buf = hd(codelist) |> Read.tokenize()
+    buf = hd(codelist) |> Read.tokenize(:filein)
     def1 = reconsult(buf,def)
     if length(codelist) == 2 do
       [_,elixir] = codelist
@@ -251,7 +251,7 @@ defmodule Prove do
   end
   def prove_builtin(x,_,_,_,_) do
     IO.inspect(x)
-    throw "error builtin"
+    throw "Error not exist builtin"
   end
 
   def eval(x,_) when is_number(x) do x end
@@ -328,9 +328,18 @@ defmodule Prove do
 
   def reconsult([],def) do def end
   def reconsult(buf,def) do
-    {s,buf1} = Read.parse(buf,:stdin)
-    {_,_,def1} = Prove.prove(s,[],[],def,1)
-    reconsult(buf1,def1)
+    {s,buf1} = Read.parse(buf,:filein)
+    if Elxlog.is_assert(s) do
+      {_,_,def1} = Prove.prove(s,[],[],def,1)
+      reconsult(buf1,def1)
+    else if Elxlog.is_pred(s) || Elxlog.is_clause(s) do
+      s1 = [:builtin,[:assert,s]]
+      {_,_,def1} = Prove.prove(s1,[],[],def,1)
+      reconsult(buf1,def1)
+    else
+      IO.inspect(s)
+    end
+    end
   end
 
   def listing([],_) do true end
