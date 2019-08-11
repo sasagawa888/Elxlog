@@ -51,8 +51,59 @@ defmodule Prove do
   end
 
 
-  def prove_builtin([:halt],_,_,_,_) do
-    throw "goodbye"
+  def prove_builtin([:ask],y,env,def,n) do
+    prove_all(y,env,def,n+1)
+  end
+  def prove_builtin([:ask|vars],y,env,def,n) do
+    ask(vars,env)
+    ans = IO.gets("")
+    cond do
+      ans == ".\n" -> prove_all(y,env,def,n+1)
+      ans == ";\n" -> {false,env,def}
+      true -> prove_all(y,env,def,n+1)
+    end
+  end
+  def prove_builtin([:assert,x],y,env,def,n) do
+    if Elxlog.is_pred(x) do
+      [_,[name|_]] = x
+      def1 = find_def(def,name)
+      def2 = Keyword.put(def,name,def1++[x])
+      prove_all(y,env,def2,n+1)
+    else
+      #clause
+      [_,[_,[name|_]],_] = x
+      def1 = find_def(def,name)
+      def2 = Keyword.put(def,name,def1++[x])
+      prove_all(y,env,def2,n+1)
+    end
+  end
+  def prove_builtin([:asserta,x],y,env,def,n) do
+    if Elxlog.is_pred(x) do
+      [_,[name|_]] = x
+      def1 = find_def(def,name)
+      def2 = Keyword.put(def,name,[x]++def1)
+      prove_all(y,env,def2,n+1)
+    else
+      #clause
+      [_,[_,[name|_]],_] = x
+      def1 = find_def(def,name)
+      def2 = Keyword.put(def,name,[x]++def1)
+      prove_all(y,env,def2,n+1)
+    end
+  end
+  def prove_builtin([:assertz,x],y,env,def,n) do
+    if Elxlog.is_pred(x) do
+      [_,[name|_]] = x
+      def1 = find_def(def,name)
+      def2 = Keyword.put(def,name,def1++[x])
+      prove_all(y,env,def2,n+1)
+    else
+      #clause
+      [_,[_,[name|_]],_] = x
+      def1 = find_def(def,name)
+      def2 = Keyword.put(def,name,def1++[x])
+      prove_all(y,env,def2,n+1)
+    end
   end
   def prove_builtin([:atom,x],y,env,def,n) do
     x1 = deref(x,env)
@@ -70,13 +121,34 @@ defmodule Prove do
       {false,env,def}
     end
   end
-  def prove_builtin([:integer,x],y,env,def,n) do
-    x1 = deref(x,env)
-    if is_integer(x1) do
-      prove_all(y,env,def,n+1)
-    else
+  def prove_builtin([:between,a,b,c],y,env,def,n) do
+    a1 = deref(a,env)
+    b1 = deref(b,env)
+    if a1 > b1 do
       {false,env,def}
+    else
+      env1 = unify(c,a1,env)
+      if prove_all(y,env1,def,n+1) == true do
+        {true,env1,def}
+      else
+        prove_builtin([:between,a1+1,b1,c],y,env,def,n)
+      end
     end
+  end
+  def prove_builtin([:debug],y,env,def,n) do
+    debug(def,[])
+    prove_all(y,env,def,n+1)
+  end
+  def prove_builtin([:elixir,[:func,x]],y,env,def,n) do
+      {x1,_} = Code.eval_string(func_to_str(x),[],__ENV__)
+      if x1 == true do
+        prove_all(y,env,def,n+1)
+      else
+        {false,env,def}
+      end
+  end
+  def prove_builtin([:fail],_,env,def,_) do
+    {false,env,def}
   end
   def prove_builtin([:float,x],y,env,def,n) do
     x1 = deref(x,env)
@@ -86,21 +158,38 @@ defmodule Prove do
       {false,env,def}
     end
   end
-  def prove_builtin([:number,x],y,env,def,n) do
+  def prove_builtin([:halt],_,_,_,_) do
+    throw "goodbye"
+  end
+  def prove_builtin([:integer,x],y,env,def,n) do
     x1 = deref(x,env)
-    if is_number(x1) do
+    if is_integer(x1) do
       prove_all(y,env,def,n+1)
     else
       {false,env,def}
     end
   end
-  def prove_builtin([:var,x],y,env,def,n) do
-    x1 = deref(x,env)
-    if Elxlog.is_var(x1) do
-      prove_all(y,env,def,n+1)
-    else
-      {false,env,def}
-    end
+  def prove_builtin([:is,a,b],y,env,def,n) do
+    b1 = eval(b,env)
+    env1 = unify(a,b1,env)
+    prove_all(y,env1,def,n+1)
+  end
+  def prove_builtin([:listing],y,env,def,n) do
+    listing(Enum.reverse(def),[])
+    prove_all(y,env,def,n+1)
+  end
+  def prove_builtin([:listing,a],y,env,def,n) do
+    def[a] |> listing1()
+    prove_all(y,env,def,n+1)
+  end
+  def prove_builtin([:length,a,b],y,env,def,n) do
+    a1 = deref(a,env)
+    env1 = unify(length(a1),b,env)
+    prove_all(y,env1,def,n+1)
+  end
+  def prove_builtin([:nl],y,env,def,n) do
+    IO.puts("")
+    prove_all(y,env,def,n+1)
   end
   def prove_builtin([:nonvar,x],y,env,def,n) do
     x1 = deref(x,env)
@@ -110,14 +199,21 @@ defmodule Prove do
       {false,env,def}
     end
   end
-  def prove_builtin([:write,x],y,env,def,n) do
-    x1 = deref(x,env)
-    Print.print1(x1)
-    prove_all(y,env,def,n+1)
+  def prove_builtin([:not,a],y,env,def,n) do
+    {res,_,_} = prove(a,y,env,def,n)
+    if res == true do
+      {false,env,def}
+    else
+      prove_all(y,env,def,n+1)
+    end
   end
-  def prove_builtin([:nl],y,env,def,n) do
-    IO.puts("")
-    prove_all(y,env,def,n+1)
+  def prove_builtin([:number,x],y,env,def,n) do
+    x1 = deref(x,env)
+    if is_number(x1) do
+      prove_all(y,env,def,n+1)
+    else
+      {false,env,def}
+    end
   end
   def prove_builtin([:reconsult,x],y,env,_,n) do
     {status,string} = File.read(Atom.to_string(x))
@@ -133,43 +229,20 @@ defmodule Prove do
     end
     prove_all(y,env,def1,n+1)
   end
-  def prove_builtin([:assert,x],y,env,def,n) do
-    if Elxlog.is_pred(x) do
-      [_,[name|_]] = x
-      def1 = find_def(def,name)
-      def2 = Keyword.put(def,name,def1++[x])
-      prove_all(y,env,def2,n+1)
+  def prove_builtin([:true],y,env,def,n) do
+    prove_all(y,env,def,n+1)
+  end
+  def prove_builtin([:var,x],y,env,def,n) do
+    x1 = deref(x,env)
+    if Elxlog.is_var(x1) do
+      prove_all(y,env,def,n+1)
     else
-      #clause
-      [_,[_,[name|_]],_] = x
-      def1 = find_def(def,name)
-      def2 = Keyword.put(def,name,def1++[x])
-      prove_all(y,env,def2,n+1)
+      {false,env,def}
     end
   end
-  def prove_builtin([:elixir,[:func,x]],y,env,def,n) do
-      {x1,_} = Code.eval_string(func_to_str(x),[],__ENV__)
-      if x1 == true do
-        prove_all(y,env,def,n+1)
-      else
-        {false,env,def}
-      end
-  end
-  def prove_builtin([:is,a,b],y,env,def,n) do
-    b1 = eval(b,env)
-    env1 = unify(a,b1,env)
-    prove_all(y,env1,def,n+1)
-  end
-  def prove_builtin([:listing],y,env,def,n) do
-    listing(Enum.reverse(def),[])
-    prove_all(y,env,def,n+1)
-  end
-  def prove_builtin([:listing,a],y,env,def,n) do
-    def[a] |> listing1()
-    prove_all(y,env,def,n+1)
-  end
-  def prove_builtin([:debug],y,env,def,n) do
-    debug(def,[])
+  def prove_builtin([:write,x],y,env,def,n) do
+    x1 = deref(x,env)
+    Print.print1(x1)
     prove_all(y,env,def,n+1)
   end
   def prove_builtin([:=,a,b],y,env,def,n) do
@@ -226,46 +299,6 @@ defmodule Prove do
       [_,x] = a1
       env1 = unify(x,b1,env)
       prove_all(y,env1,def,n+1)
-    end
-  end
-  def prove_builtin([:ask],y,env,def,n) do
-    prove_all(y,env,def,n+1)
-  end
-  def prove_builtin([:ask|vars],y,env,def,n) do
-    ask(vars,env)
-    ans = IO.gets("")
-    cond do
-      ans == ".\n" -> prove_all(y,env,def,n+1)
-      ans == ";\n" -> {false,env,def}
-      true -> prove_all(y,env,def,n+1)
-    end
-  end
-  def prove_builtin([:true],y,env,def,n) do
-    prove_all(y,env,def,n+1)
-  end
-  def prove_builtin([:fail],_,env,def,_) do
-    {false,env,def}
-  end
-  def prove_builtin([:not,a],y,env,def,n) do
-    {res,_,_} = prove(a,y,env,def,n)
-    if res == true do
-      {false,env,def}
-    else
-      prove_all(y,env,def,n+1)
-    end
-  end
-  def prove_builtin([:between,a,b,c],y,env,def,n) do
-    a1 = deref(a,env)
-    b1 = deref(b,env)
-    if a1 > b1 do
-      {false,env,def}
-    else
-      env1 = unify(c,a1,env)
-      if prove_all(y,env1,def,n+1) == true do
-        {true,env1,def}
-      else
-        prove_builtin([:between,a1+1,b1,c],y,env,def,n)
-      end
     end
   end
   def prove_builtin(x,_,_,_,_) do

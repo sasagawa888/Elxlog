@@ -33,8 +33,11 @@ builtin:
   nl/0
   reconsult/1  (['filename.pl'])
   assert/1
+  asserta/1
+  assertz/1
   between/3
   is/2
+  length/2
   =/2
   </2
   >/2
@@ -43,6 +46,7 @@ builtin:
   =../2
   halt/0
   listing/0
+  listing/1
   elixir/1  Run the Elixir code. See function.ex (e.g. elixir(elx_in_the_park()) )
 formula:
   +,^,*,/,^
