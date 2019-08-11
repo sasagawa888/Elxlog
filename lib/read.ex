@@ -296,89 +296,89 @@ defmodule Read do
     str |> String.to_charlist |> tokenize1([],[],stream)
   end
 
-  defp tokenize1([],[],res,_) do
+  def tokenize1([],[],res,_) do
     Enum.reverse(res)
   end
-  defp tokenize1([],token,res,_) do
+  def tokenize1([],token,res,_) do
     token1 = Enum.reverse(token) |> List.to_string
     res1 = [token1|res]
     Enum.reverse(res1)
   end
   # LF
-  defp tokenize1([10|ls],[],res,stream) do
+  def tokenize1([10|ls],[],res,stream) do
     tokenize1(ls,[],res,stream)
   end
-  defp tokenize1([10|ls],token,res,stream) do
+  def tokenize1([10|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],[token1|res],stream)
   end
   # CR
-  defp tokenize1([13|ls],[],res,stream) do
+  def tokenize1([13|ls],[],res,stream) do
     tokenize1(ls,[],res,stream)
   end
-  defp tokenize1([13|ls],token,res,stream) do
+  def tokenize1([13|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],[token1|res],stream)
   end
   # comment %
-  defp tokenize1([37|ls],[],res,stream) do
+  def tokenize1([37|ls],[],res,stream) do
     ls1 = comment_skip(ls)
     tokenize1(ls1,[],res,stream)
   end
   #space
-  defp tokenize1([32,32|ls],token,res,stream) do
+  def tokenize1([32,32|ls],token,res,stream) do
     tokenize1(ls,token,res,stream)
   end
-  defp tokenize1([32|ls],[],res,stream) do
+  def tokenize1([32|ls],[],res,stream) do
     tokenize1(ls,[],res,stream)
   end
-  defp tokenize1([32|ls],token,res,stream) do
+  def tokenize1([32|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],[token1|res],stream)
   end
-  defp tokenize1([40|ls],[],res,stream) do
+  def tokenize1([40|ls],[],res,stream) do
     tokenize1(ls,[],["("|res],stream)
   end
-  defp tokenize1([40|ls],token,res,stream) do
+  def tokenize1([40|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["(",token1|res],stream)
   end
-  defp tokenize1([41|ls],[],res,stream) do
+  def tokenize1([41|ls],[],res,stream) do
     tokenize1(ls,[],[")"|res],stream)
   end
-  defp tokenize1([41|ls],token,res,stream) do
+  def tokenize1([41|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],[")",token1|res],stream)
   end
-  defp tokenize1([91|ls],[],res,stream) do
+  def tokenize1([91|ls],[],res,stream) do
     tokenize1(ls,[],["["|res],stream)
   end
-  defp tokenize1([91|ls],token,res,stream) do
+  def tokenize1([91|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["[",token1|res],stream)
   end
-  defp tokenize1([93|ls],[],res,stream) do
+  def tokenize1([93|ls],[],res,stream) do
     tokenize1(ls,[],["]"|res],stream)
   end
-  defp tokenize1([93|ls],token,res,stream) do
+  def tokenize1([93|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["]",token1|res],stream)
   end
-  defp tokenize1([124|ls],[],res,stream) do
+  def tokenize1([124|ls],[],res,stream) do
     tokenize1(ls,[],["|"|res],stream)
   end
-  defp tokenize1([124|ls],token,res,stream) do
+  def tokenize1([124|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["|",token1|res],stream)
   end
-  defp tokenize1([44|ls],[],res,stream) do
+  def tokenize1([44|ls],[],res,stream) do
     tokenize1(ls,[],[","|res],stream)
   end
-  defp tokenize1([44|ls],token,res,stream) do
+  def tokenize1([44|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],[",",token1|res],stream)
   end
-  defp tokenize1([46|ls],[],res,stream) do
+  def tokenize1([46|ls],[],res,stream) do
     if (ls == [10] || ls == [13]) && stream == :stdin do
       Enum.reverse(["."|res])
     else if (hd(ls) == 10 || hd(ls) == 13) && stream == :filein do
@@ -388,10 +388,10 @@ defmodule Read do
     end
     end
   end
-  defp tokenize1([46|ls],token,res,stream) do
+  def tokenize1([46|ls],token,res,stream) do
     if (ls == [10] || ls == [13]) && stream == :stdin do
       token1 = token |> Enum.reverse |> List.to_string
-      Enum.reverse([".",token1|res],stream)
+      Enum.reverse([".",token1|res])
     else if (hd(ls) == 10 || hd(ls) == 13) && stream == :filein do
       token1 = token |> Enum.reverse |> List.to_string
       tokenize1(ls,[],[".",token1|res],stream)
@@ -400,56 +400,56 @@ defmodule Read do
     end
     end
   end
-  defp tokenize1([43|ls],[],res,stream) do
+  def tokenize1([43|ls],[],res,stream) do
     tokenize1(ls,[],["+"|res],stream)
   end
-  defp tokenize1([43|ls],token,res,stream) do
+  def tokenize1([43|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["+",token1|res],stream)
   end
-  defp tokenize1([58,45|ls],[],res,stream) do
+  def tokenize1([58,45|ls],[],res,stream) do
     tokenize1(ls,[],[":-"|res],stream)
   end
-  defp tokenize1([58,45|ls],token,res,stream) do
+  def tokenize1([58,45|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],[":-",token1|res],stream)
   end
-  defp tokenize1([45|ls],[],res,stream) do
+  def tokenize1([45|ls],[],res,stream) do
     tokenize1(ls,[],["-"|res],stream)
   end
-  defp tokenize1([45|ls],token,res,stream) do
+  def tokenize1([45|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["-",token1|res],stream)
   end
-  defp tokenize1([42|ls],[],res,stream) do
+  def tokenize1([42|ls],[],res,stream) do
     tokenize1(ls,[],["*"|res],stream)
   end
-  defp tokenize1([42|ls],token,res,stream) do
+  def tokenize1([42|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["*",token1|res],stream)
   end
-  defp tokenize1([47|ls],[],res,stream) do
+  def tokenize1([47|ls],[],res,stream) do
     tokenize1(ls,[],["/"|res],stream)
   end
-  defp tokenize1([47|ls],token,res,stream) do
+  def tokenize1([47|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["/",token1|res],stream)
   end
-  defp tokenize1([94|ls],token,res,stream) do
+  def tokenize1([94|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["^",token1|res],stream)
   end
   # '....' quote
-  defp tokenize1([39|ls],[],res,stream) do
+  def tokenize1([39|ls],[],res,stream) do
     {atom,rest} = quote_token(ls,[])
     tokenize1(rest,[],[atom|res],stream)
   end
-  defp tokenize1([39|ls],token,res,stream) do
+  def tokenize1([39|ls],token,res,stream) do
     {atom,rest} = quote_token(ls,[])
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(rest,[],[atom,token1|res],stream)
   end
-  defp tokenize1([l|ls],token,res,stream) do
+  def tokenize1([l|ls],token,res,stream) do
     tokenize1(ls,[l|token],res,stream)
   end
 
