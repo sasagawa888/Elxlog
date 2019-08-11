@@ -158,7 +158,7 @@ defmodule Prove do
     prove_all(y,env1,def,n+1)
   end
   def prove_builtin([:listing],y,env,def,n) do
-    listing(def,[])
+    listing(Enum.reverse(def),[])
     prove_all(y,env,def,n+1)
   end
   def prove_builtin([:debug],y,env,def,n) do
