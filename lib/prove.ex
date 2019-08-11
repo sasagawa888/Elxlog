@@ -121,8 +121,13 @@ defmodule Prove do
   end
   def prove_builtin([:reconsult,x],y,env,def,n) do
     {:ok,string} = File.read(Atom.to_string(x))
-    buf = string |> Read.tokenize()
+    codelist = String.split(string,"!elixir")
+    buf = hd(codelist) |> Read.tokenize()
     def1 = reconsult(buf,def)
+    if length(codelist) == 2 do
+      [_,elixir] = codelist
+      Code.compile_string(elixir)
+    end
     prove_all(y,env,def1,n+1)
   end
   def prove_builtin([:assert,x],y,env,def,n) do

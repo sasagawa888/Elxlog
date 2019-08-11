@@ -2,10 +2,16 @@ Small pure Prolog intepreter in Elixir.
 Project is called Elxlog.
 Goal: Fusion of Elixir and Prolog
 
-caution: predicate with zero arity is written like this:
+caution:
+ predicate with zero arity is written like this:
  e.g. halt()  true()  fail()
 
  float number is same as ISO-Prolog e.g. 3.0e4
+
+ comma and period is delimiter. Not operator.
+
+ Elixir code can be mixed in the file read by reconsult/1.
+ The line after Åg!ElixirÅh is Elixir code. see test.pl
 
 invoke:
   mix elxlog
