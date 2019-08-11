@@ -209,6 +209,18 @@ defmodule Prove do
       {false,env,def}
     end
   end
+  def prove_builtin([:"=..",a,b],y,env,def,n) do
+    a1 = deref(a,env)
+    b1 = deref(b,env)
+    if Elxlog.is_var(a1) do
+      env1 = unify(a1,[:pred,b1],env)
+      prove_all(y,env1,def,n+1)
+    else
+      [_,x] = a1
+      env1 = unify(x,b1,env)
+      prove_all(y,env1,def,n+1)
+    end
+  end
   def prove_builtin([:ask],y,env,def,n) do
     prove_all(y,env,def,n+1)
   end

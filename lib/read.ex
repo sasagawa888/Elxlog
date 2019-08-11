@@ -15,7 +15,7 @@ defmodule Read do
     Enum.member?(["assert","halt","write","nl","is","listing","ask","debug",
                   "atom","atomic","integer","float","number","reconsult","var","nonvar",
                   "elixir","true","fail","between","not",
-                  ":-",">","<","=>","=<"],x)
+                  ":-",">","<","=>","=<","=.."],x)
   end
 
   def is_func_str(x) do
@@ -413,6 +413,13 @@ defmodule Read do
   def tokenize1([58,45|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],[":-",token1|res],stream)
+  end
+  def tokenize1([61,46,46|ls],[],res,stream) do
+    tokenize1(ls,[],["=.."|res],stream)
+  end
+  def tokenize1([61,46,46|ls],token,res,stream) do
+    token1 = token |> Enum.reverse |> List.to_string
+    tokenize1(ls,[],["=..",token1|res],stream)
   end
   def tokenize1([45|ls],[],res,stream) do
     tokenize1(ls,[],["-"|res],stream)

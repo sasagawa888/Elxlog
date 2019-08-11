@@ -40,6 +40,7 @@ builtin:
   >/2
   =>/2
   =</2
+  =../2
   halt/0
   listing/0
   elixir/1  Run the Elixir code. See function.ex (e.g. elixir(elx_in_the_park()) )
