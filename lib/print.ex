@@ -39,6 +39,10 @@ defmodule Print do
   end
 
   def print_body([]) do true end
+  def print_body([x]) do
+    print_pred(x)
+    IO.write(".")
+  end
   def print_body([x|xs]) do
     print_pred(x)
     IO.write(",")
