@@ -47,10 +47,10 @@ builtin:
   halt/0
   listing/0
   listing/1
-  elixir/1  Run the Elixir code. See function.ex (e.g. elixir(elx_in_the_park()) )
+  elixir/1  Run the Elixir code. See test.pl (e.g. elixir(elx_in_the_park()) )
 formula:
   +,^,*,/,^
-  prefix "elx_" means Elixir function. See function.ex
+  prefix "elx_" means Elixir function. See test.pl
 
 Example:
 mix prolog
