@@ -119,14 +119,14 @@ defmodule Prove do
     IO.puts("")
     prove_all(y,env,def,n+1)
   end
-  def prove_builtin([:reconsult,x],y,env,def,n) do
+  def prove_builtin([:reconsult,x],y,env,_,n) do
     {status,string} = File.read(Atom.to_string(x))
     if status == :error do
       throw "Error reconsult"
     end
     codelist = String.split(string,"!elixir")
     buf = hd(codelist) |> Read.tokenize(:filein)
-    def1 = reconsult(buf,def)
+    def1 = reconsult(buf,[])
     if length(codelist) == 2 do
       [_,elixir] = codelist
       Code.compile_string(elixir)
@@ -162,6 +162,10 @@ defmodule Prove do
   end
   def prove_builtin([:listing],y,env,def,n) do
     listing(Enum.reverse(def),[])
+    prove_all(y,env,def,n+1)
+  end
+  def prove_builtin([:listing,a],y,env,def,n) do
+    def[a] |> listing1()
     prove_all(y,env,def,n+1)
   end
   def prove_builtin([:debug],y,env,def,n) do
