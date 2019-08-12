@@ -100,9 +100,9 @@ defmodule Elxlog do
   end
   def is_atomvar(_) do false end
 
-  def is_anonymous(x) do
-    x == :_
-  end
+  def is_anonymous(:_) do true end
+  def is_anonymous({:_,_}) do true end
+  def is_anonymous(_) do false end
 
   # variant variable
   def is_variant({x,y}) when is_integer(y) do

@@ -15,7 +15,7 @@ defmodule Read do
     Enum.member?(["assert","asserta","assertz","halt","write","nl","is","listing","ask","debug",
                   "atom","atomic","integer","float","number","reconsult","var","nonvar",
                   "elixir","true","fail","between","not","length",
-                  ":-",">","<","=>","=<","=.."],x)
+                  ":-",">","<","=>","=<","=..","==","!="],x)
   end
 
   def is_func_str(x) do
@@ -47,7 +47,7 @@ defmodule Read do
   end
 
   def is_infix_builtin(x) do
-    Enum.member?([:is,:=,:"=..",:==,:"=>",:"=<",:>,:<,:^],x)
+    Enum.member?([:is,:=,:"=..",:==,:">=",:"<=",:>,:<,:^,:==,:!=],x)
   end
 
   def parse(buf,stream) do
@@ -73,7 +73,7 @@ defmodule Read do
         true -> throw "error parse1"
       end
     else
-      throw "error parse"
+      throw "Error parse #{s2}"
     end
     end
     end
@@ -303,6 +303,10 @@ defmodule Read do
     token1 = Enum.reverse(token) |> List.to_string
     res1 = [token1|res]
     Enum.reverse(res1)
+  end
+  #tab
+  def tokenize1([9|ls],[],res,stream) do
+    tokenize1(ls,[],res,stream)
   end
   # LF
   def tokenize1([10|ls],[],res,stream) do

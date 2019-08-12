@@ -10,6 +10,9 @@ caution:
 
  comma and period is delimiter. Not operator.
 
+ The comparison operation is the same as C and Elixir.
+ e.g. < > >= <= == !=
+
  Elixir code can be mixed in the file read by reconsult/1.
  The line after "!Elixir" is Elixir code. see test.pl
 
@@ -41,8 +44,10 @@ builtin:
   =/2
   </2
   >/2
-  =>/2
-  =</2
+  >=/2
+  <=/2
+  !=/2
+  ==/2
   =../2
   halt/0
   listing/0

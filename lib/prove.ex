@@ -262,7 +262,7 @@ defmodule Prove do
       {false,env,def}
     end
   end
-  def prove_builtin([:"=>",a,b],y,env,def,n) do
+  def prove_builtin([:">=",a,b],y,env,def,n) do
     a1 = eval(a,env)
     b1 = eval(b,env)
     if a1 >= b1 do
@@ -280,10 +280,28 @@ defmodule Prove do
       {false,env,def}
     end
   end
-  def prove_builtin([:"=<",a,b],y,env,def,n) do
+  def prove_builtin([:"<=",a,b],y,env,def,n) do
     a1 = eval(a,env)
     b1 = eval(b,env)
     if a1 <= b1 do
+      prove_all(y,env,def,n+1)
+    else
+      {false,env,def}
+    end
+  end
+  def prove_builtin([:"!=",a,b],y,env,def,n) do
+    a1 = eval(a,env)
+    b1 = eval(b,env)
+    if a1 != b1 do
+      prove_all(y,env,def,n+1)
+    else
+      {false,env,def}
+    end
+  end
+  def prove_builtin([:"==",a,b],y,env,def,n) do
+    a1 = eval(a,env)
+    b1 = eval(b,env)
+    if a1 == b1 do
       prove_all(y,env,def,n+1)
     else
       {false,env,def}

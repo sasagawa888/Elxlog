@@ -100,7 +100,7 @@ defmodule Print do
   end
 
   defp print_tuple([]) do
-    true
+    IO.write("()")
   end
   defp print_tuple([x|xs]) do
     IO.write("(")
