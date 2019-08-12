@@ -54,6 +54,7 @@ builtin:
   halt/0
   listing/0
   listing/1
+  time/1
   elixir/1  Run the Elixir code. See test.pl (e.g. elixir(elx_in_the_park()) )
 formula:
   +,^,*,/,^
@@ -77,8 +78,6 @@ likes(kim,X) :- likes(X,lee),likes(X,kim).
 likes(X,X)
 append([],Xs,Xs)
 append([X,|Ls],Ys,[X,|Zs]) :- append(Ls,Ys,Zs).
-bet(N,M,K) :- =<(N,M),=(K,N).
-bet(N,M,K) :- <(N,M),is(N1,N+1),bet(N1,M,K).
 true
 ?- X is elx_ack(3,11).
 X = 16381

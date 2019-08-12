@@ -229,6 +229,15 @@ defmodule Prove do
     end
     prove_all(y,env,def1,n+1)
   end
+  def prove_builtin([:time,x],y,env,def,n) do
+    {time, {res,env1,_}} = :timer.tc(fn() -> prove(x,[],env,def,n) end)
+    IO.inspect "time: #{time} micro second"
+    if res == true do
+      prove_all(y,env1,def,n+1)
+    else
+      {false,env,def}
+    end
+  end
   def prove_builtin([:true],y,env,def,n) do
     prove_all(y,env,def,n+1)
   end
@@ -373,6 +382,7 @@ defmodule Prove do
       is_integer(x) -> [Integer.to_string(x)]
       is_float(x) -> [Float.to_string(x)]
       is_atom(x) -> [Atom.to_string(x)]
+      is_list(x) -> [list_to_str2(x)]
     end
   end
   def list_to_str1([x|xs]) do
@@ -380,7 +390,13 @@ defmodule Prove do
       is_integer(x) -> [Integer.to_string(x)]++[","]++list_to_str1(xs)
       is_float(x) -> [Float.to_string(x)]++[","]++list_to_str1(xs)
       is_atom(x) -> [Atom.to_string(x)]++[","]++list_to_str1(xs)
+      is_list(x) -> [list_to_str2(x)++[","]++list_to_str1(xs)]
     end
+  end
+
+  def list_to_str2([]) do ["[]"] end
+  def list_to_str2(x) do
+    ["["]++list_to_str1(x)++["]"]
   end
 
   def ask([],_) do true end

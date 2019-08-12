@@ -14,7 +14,7 @@ defmodule Read do
   def is_builtin_str(x) do
     Enum.member?(["assert","asserta","assertz","halt","write","nl","is","listing","ask","debug",
                   "atom","atomic","integer","float","number","reconsult","var","nonvar",
-                  "elixir","true","fail","between","not","length",
+                  "elixir","true","fail","between","not","length","time",
                   ":-",">","<","=>","=<","=..","==","!="],x)
   end
 
@@ -204,7 +204,7 @@ defmodule Read do
   def read([x,","|xs],_) do
     cond do
       is_builtin_str(x) -> {[:builtin,[String.to_atom(x)]],[","|xs]}
-      is_atom_str(x) -> {[:pred,[String.to_atom(x)]],[","|xs]}
+      is_atom_str(x) -> {String.to_atom(x),[","|xs]}
       is_var_str(x) -> {String.to_atom(x),[","|xs]}
       is_integer_str(x) ->{String.to_integer(x),[","|xs]}
       is_float_str(x) -> {String.to_float(x),[","|xs]}

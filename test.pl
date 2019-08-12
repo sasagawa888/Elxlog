@@ -15,6 +15,8 @@ append([X | Ls], Ys, [X | Zs]) :- append(Ls, Ys, Zs).
 
 tarai(X,Y,Z,A) :- A is elx_tarai(X,Y,Z).
 
+ack(M,N,A) :- A is elx_ack(M,N).
+
 !elixir
 defmodule Elxfunc do
   def ack(0, n), do: n + 1
