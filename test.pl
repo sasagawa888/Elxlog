@@ -13,8 +13,7 @@ likes(X,X).
 append([], Xs, Xs).
 append([X | Ls], Ys, [X | Zs]) :- append(Ls, Ys, Zs).
 
-bet(N, M, K) :- N <= M, K = N.
-bet(N, M, K) :- N < M, N1 is N+1, bet(N1, M, K).
+tarai(X,Y,Z,A) :- A is elx_tarai(X,Y,Z).
 
 !elixir
 defmodule Elxfunc do

@@ -140,8 +140,6 @@ defmodule Prove do
     prove_all(y,env,def,n+1)
   end
   def prove_builtin([:elixir,[:func,x]],y,env,def,n) do
-      IO.inspect(deref(x,env))
-      Elxlog.stop()
       {x1,_} = deref(x,env) |> func_to_str() |> Code.eval_string([],__ENV__)
       if x1 == true do
         prove_all(y,env,def,n+1)
@@ -172,7 +170,7 @@ defmodule Prove do
     end
   end
   def prove_builtin([:is,a,b],y,env,def,n) do
-    b1 = eval(b,env)
+    b1 = eval(deref(b,env),env)
     env1 = unify(a,b1,env)
     prove_all(y,env1,def,n+1)
   end
@@ -475,6 +473,15 @@ defmodule Prove do
     else
       deref(x1,env)
     end
+  end
+  def deref([:func,x],env) do
+    [:func,deref(x,env)]
+  end
+  def deref([:pred,x],env) do
+    [:pred,deref(x,env)]
+  end
+  def deref([:builtin,x],env) do
+    [:builtin,deref(x,env)]
   end
   def deref([],_) do [] end
   def deref([x|xs],env) do
