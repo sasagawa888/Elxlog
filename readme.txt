@@ -13,6 +13,8 @@ caution:
  The comparison operation is the same as C and Elixir.
  e.g. < > >= <= == !=
 
+ Anonymous variables in the same clause are not distinguished.
+
  Elixir code can be mixed in the file read by reconsult/1.
  The line after "!Elixir" is Elixir code. see test.pl
 

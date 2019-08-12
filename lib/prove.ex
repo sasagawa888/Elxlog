@@ -140,7 +140,9 @@ defmodule Prove do
     prove_all(y,env,def,n+1)
   end
   def prove_builtin([:elixir,[:func,x]],y,env,def,n) do
-      {x1,_} = Code.eval_string(func_to_str(x),[],__ENV__)
+      IO.inspect(deref(x,env))
+      Elxlog.stop()
+      {x1,_} = deref(x,env) |> func_to_str() |> Code.eval_string([],__ENV__)
       if x1 == true do
         prove_all(y,env,def,n+1)
       else

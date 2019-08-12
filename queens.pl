@@ -23,3 +23,15 @@ nodiag([N|L], B, D) :-
 	D != B - N,
 	D1 is D + 1,
 	nodiag(L, B, D1).
+
+!elixir
+defmodule Elxfunc do
+	def nodiag([],_,_) do true end
+	def nodiag([n|l],b,d) do
+		if d != n-b && d != b-n do
+			nodiag(l,b,d+1)
+		else
+			false
+		end
+	end
+end
