@@ -397,6 +397,7 @@ defmodule Prove do
     end
   end
 
+  def listing1(nil) do true end 
   def listing1([]) do true end
   def listing1([x|xs]) do
     Print.print(x)
