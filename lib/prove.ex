@@ -142,8 +142,17 @@ defmodule Prove do
   end
   def prove_builtin([:length,a,b],y,env,def,n) do
     a1 = deref(a,env)
-    env1 = unify(length(a1),b,env)
-    prove_all(y,env1,def,n+1)
+    b1 = deref(b,env)
+    if is_list(a1) && Elxlog.is_var(b1) do
+      env1 = unify(length(a1),b,env)
+      prove_all(y,env1,def,n+1)
+    else if  Elxlog.is_var(a1) && is_integer(b1) do
+      env1 = unify(a1,make_list(b1),env)
+      prove_all(y,env1,def,n+1)
+    else
+      throw "Error length #{a1} #{b1}"
+    end
+    end
   end
   def prove_builtin([:nl],y,env,def,n) do
     IO.puts("")
@@ -397,11 +406,16 @@ defmodule Prove do
     end
   end
 
-  def listing1(nil) do true end 
+  def listing1(nil) do true end
   def listing1([]) do true end
   def listing1([x|xs]) do
     Print.print(x)
     listing1(xs)
+  end
+
+  def make_list(0) do [] end
+  def make_list(n) do
+    [:_|make_list(n-1)]
   end
 
   def debug([],_) do true end
