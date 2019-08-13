@@ -63,48 +63,6 @@ defmodule Prove do
       true -> prove_all(y,env,def,n+1)
     end
   end
-  def prove_builtin([:assert,x],y,env,def,n) do
-    if Elxlog.is_pred(x) do
-      [_,[name|_]] = x
-      def1 = find_def(def,name)
-      def2 = Keyword.put(def,name,def1++[x])
-      prove_all(y,env,def2,n+1)
-    else
-      #clause
-      [_,[_,[name|_]],_] = x
-      def1 = find_def(def,name)
-      def2 = Keyword.put(def,name,def1++[x])
-      prove_all(y,env,def2,n+1)
-    end
-  end
-  def prove_builtin([:asserta,x],y,env,def,n) do
-    if Elxlog.is_pred(x) do
-      [_,[name|_]] = x
-      def1 = find_def(def,name)
-      def2 = Keyword.put(def,name,[x]++def1)
-      prove_all(y,env,def2,n+1)
-    else
-      #clause
-      [_,[_,[name|_]],_] = x
-      def1 = find_def(def,name)
-      def2 = Keyword.put(def,name,[x]++def1)
-      prove_all(y,env,def2,n+1)
-    end
-  end
-  def prove_builtin([:assertz,x],y,env,def,n) do
-    if Elxlog.is_pred(x) do
-      [_,[name|_]] = x
-      def1 = find_def(def,name)
-      def2 = Keyword.put(def,name,def1++[x])
-      prove_all(y,env,def2,n+1)
-    else
-      #clause
-      [_,[_,[name|_]],_] = x
-      def1 = find_def(def,name)
-      def2 = Keyword.put(def,name,def1++[x])
-      prove_all(y,env,def2,n+1)
-    end
-  end
   def prove_builtin([:atom,x],y,env,def,n) do
     x1 = deref(x,env)
     if is_atom(x1) && !Elxlog.is_var(x1) do
@@ -415,16 +373,17 @@ defmodule Prove do
   def reconsult([],def) do def end
   def reconsult(buf,def) do
     {s,buf1} = Read.parse(buf,:filein)
-    if Elxlog.is_assert(s) do
-      {_,_,def1} = Prove.prove(s,[],[],def,1)
-      reconsult(buf1,def1)
-    else if Elxlog.is_pred(s) || Elxlog.is_clause(s) do
-      s1 = [:builtin,[:assert,s]]
-      {_,_,def1} = Prove.prove(s1,[],[],def,1)
-      reconsult(buf1,def1)
+    if Elxlog.is_pred(s) do
+      [_,[name|_]] = s
+      def1 = find_def(def,name)
+      def2 = Keyword.put(def,name,def1++[s])
+      reconsult(buf1,def2)
     else
-      IO.inspect(s)
-    end
+      #clause
+      [_,[_,[name|_]],_] = s
+      def1 = find_def(def,name)
+      def2 = Keyword.put(def,name,def1++[s])
+      reconsult(buf1,def2)
     end
   end
 

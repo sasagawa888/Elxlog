@@ -18,6 +18,9 @@ caution:
  Elixir code can be mixed in the file read by reconsult/1.
  The line after "!Elixir" is Elixir code. see test.pl
 
+ There is no higher-order predicate such as call/1 assert/1 once/1.
+ Within first order predicate logic.
+
 invoke:
   mix elxlog
 
@@ -37,9 +40,6 @@ builtin:
   write/1
   nl/0
   reconsult/1  (['filename.pl'])
-  assert/1
-  asserta/1
-  assertz/1
   between/3
   is/2
   length/2

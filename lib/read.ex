@@ -12,7 +12,7 @@ defmodule Read do
   end
 
   def is_builtin_str(x) do
-    Enum.member?(["assert","asserta","assertz","halt","write","nl","is","listing","ask","debug",
+    Enum.member?(["halt","write","nl","is","listing","ask","debug",
                   "atom","atomic","integer","float","number","reconsult","var","nonvar",
                   "elixir","true","fail","between","not","length","time",
                   ":-",">","<","=>","=<","=..","==","!="],x)
@@ -54,10 +54,13 @@ defmodule Read do
     {s1,buf1} = read(buf,stream)
     {s2,buf2} = read(buf1,stream)
     if s2 == :. do
-      if !Elxlog.is_pred(s1) && !Elxlog.is_builtin(s1) do
+      if is_atom(s1) do
+        throw "Error parse expected () #{s1}"
+      else if !Elxlog.is_pred(s1) && !Elxlog.is_builtin(s1) do
         {[:builtin,[:reconsult|s1]],buf2}
       else
         {s1,buf2}
+      end
       end
     else if s2 == :":-" do
       {s3,buf3} = parse1(buf2,[],stream)
@@ -203,7 +206,6 @@ defmodule Read do
   end
   def read([x,","|xs],_) do
     cond do
-      is_builtin_str(x) -> {[:builtin,[String.to_atom(x)]],[","|xs]}
       is_atom_str(x) -> {String.to_atom(x),[","|xs]}
       is_var_str(x) -> {String.to_atom(x),[","|xs]}
       is_integer_str(x) ->{String.to_integer(x),[","|xs]}
