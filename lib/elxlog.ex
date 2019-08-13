@@ -58,14 +58,11 @@ defmodule Elxlog do
 
   def add_ask(x) do
     ask = [:builtin,[:ask|find_var(x)]]
-    if is_assert(x) do
-      [x]
-    else if is_pred(x) || is_builtin(x) do
+    if is_pred(x) || is_builtin(x) do
       [x] ++ [ask]
     else
       # conjunction
       x ++ [ask]
-    end
     end
   end
 
@@ -113,10 +110,6 @@ defmodule Elxlog do
     end
   end
   def is_variant(_) do false end
-
-  # assert builtin
-  def is_assert([:builtin,[:assert|_]]) do true end
-  def is_assert(_) do false end
 
   #for debug
   def stop() do
