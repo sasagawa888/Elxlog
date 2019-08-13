@@ -55,7 +55,7 @@ defmodule Read do
     {s2,buf2} = read(buf1,stream)
     if s2 == :. do
       if is_atom(s1) do
-        throw "Error parse expected () #{s1}"
+        throw "Error: parse expected () #{s1}"
       else if !Elxlog.is_pred(s1) && !Elxlog.is_builtin(s1) do
         {[:builtin,[:reconsult|s1]],buf2}
       else
@@ -73,10 +73,10 @@ defmodule Read do
       cond do
         status == :. -> {[:builtin,[s2,s1,s3]],buf3}
         status == :"," -> parse1(buf3,[[:builtin,[s2,s1,s3]]],stream)
-        true -> throw "error parse1"
+        true -> throw "Error: illegal delimiter #{s3} #{status}"
       end
     else
-      throw "Error parse #{s2}"
+      throw "Error: syntax error #{s1} #{s2}"
     end
     end
     end
@@ -104,7 +104,7 @@ defmodule Read do
       end
       end
     else
-      throw "error parse1"
+      throw "Error illegal body  #{s1} #{s2}"
     end
     end
     end
@@ -116,7 +116,7 @@ defmodule Read do
     #IO.inspect binding()
     {s,buf1} = read(buf,stream)
     cond do
-      s == :. -> throw "error 21"
+      s == :. -> throw "Error: illegal formula #{s}"
       is_func_atom(s) -> parse2([],[s],buf1,stream)
       true -> parse2([s],[],buf1,stream)
     end
@@ -129,14 +129,14 @@ defmodule Read do
       s == :"," -> {o1,buf1,:","}
       s == :")" -> {o1,buf1,:")"}
       is_func_atom(s) -> parse2([o1],[s],buf1,stream)
-      true -> throw "error 22 #{o1} #{s}"
+      true -> throw "Error: illegal formula #{o1} #{s}"
     end
   end
   def parse2([o1],[f1],buf,stream) do
     #IO.inspect binding()
     {s,buf1} = read(buf,stream)
     cond do
-      is_func_atom(s) -> throw "error 23"
+      is_func_atom(s) -> throw "Error: illegal formula #{s}"
       true -> parse2([s,o1],[f1],buf1,stream)
     end
   end
@@ -149,15 +149,15 @@ defmodule Read do
       s == :")" -> {[:formula,[f1,o2,o1]],buf1,:")"}
       is_func_atom(s) && weight(s)>=weight(f1) -> parse2([[f1,o2,o1]],[s],buf1,stream)
       is_func_atom(s) && weight(s)<weight(f1) -> parse2([o1,o2],[s,f1],buf1,stream)
-      true -> throw "error 24"
+      true -> throw "Error: illegal formula #{s}"
     end
   end
   def parse2([o1,o2],[f1,f2],buf,stream) do
     #IO.inspect binding()
     {s,buf1} = read(buf,stream)
     cond do
-      s == :.  -> throw "Error 25"
-      is_func_atom(s) -> throw "error 26"
+      s == :.  -> throw "Error: illegal formula #{f1} #{s}"
+      is_func_atom(s) -> throw "Error: illegal formula #{s}"
       true -> parse2([[f2,o2,[f1,o1,s]]],[],buf1,stream)
     end
   end
@@ -236,7 +236,7 @@ defmodule Read do
       buf = IO.gets("") |> tokenize(stream)
       read_list(buf,ls,stream)
     else
-      throw "Error read list"
+      throw "Error: read list"
     end
   end
   defp read_list(["]"|xs],ls,_) do
@@ -272,7 +272,7 @@ defmodule Read do
       buf = IO.gets("") |> tokenize(stream)
       read_tuple(buf,ls,stream)
     else
-      throw "Error read tuple"
+      throw "Error: read tuple"
     end
   end
   defp read_tuple([")"|xs],ls,_) do
@@ -478,7 +478,7 @@ defmodule Read do
   end
 
   defp quote_token([],_) do
-    throw "Error illegal quote"
+    throw "Error: illegal quote"
   end
   defp quote_token([39|ls],token) do
     atom = token |> Enum.reverse() |> List.to_string()
