@@ -15,7 +15,7 @@ defmodule Read do
     Enum.member?(["halt","write","nl","is","listing","ask","debug",
                   "atom","atomic","integer","float","number","reconsult","var","nonvar",
                   "elixir","true","fail","between","not","length","time",
-                  ":-",">","<","=>","=<","=..","==","!="],x)
+                  ":-",">","<","=>","=<","=..","==","!=","="],x)
   end
 
   def is_func_str(x) do
@@ -55,7 +55,7 @@ defmodule Read do
     {s2,buf2} = read(buf1,stream)
     if s2 == :. do
       if is_atom(s1) do
-        throw "Error: parse expected () #{s1}"
+        Elxlog.error("Error: parse expected () ", [s1])
       else if !Elxlog.is_pred(s1) && !Elxlog.is_builtin(s1) do
         {[:builtin,[:reconsult|s1]],buf2}
       else
@@ -73,10 +73,10 @@ defmodule Read do
       cond do
         status == :. -> {[:builtin,[s2,s1,s3]],buf3}
         status == :"," -> parse1(buf3,[[:builtin,[s2,s1,s3]]],stream)
-        true -> throw "Error: illegal delimiter #{s3} #{status}"
+        true -> Elxlog.error("Error: illegal delimiter ",[s3,status])
       end
     else
-      throw "Error: syntax error #{s1} #{s2}"
+      Elxlog.error("Error: syntax error ",[s1,s2])
     end
     end
     end
@@ -104,7 +104,7 @@ defmodule Read do
       end
       end
     else
-      throw "Error illegal body  #{s1} #{s2}"
+      Elxlog.error("Error illegal body ",  [s1,s2])
     end
     end
     end
@@ -116,7 +116,7 @@ defmodule Read do
     #IO.inspect binding()
     {s,buf1} = read(buf,stream)
     cond do
-      s == :. -> throw "Error: illegal formula #{s}"
+      s == :. -> Elxlog.error("Error: illegal formula ",[s])
       is_func_atom(s) -> parse2([],[s],buf1,stream)
       true -> parse2([s],[],buf1,stream)
     end
@@ -129,14 +129,14 @@ defmodule Read do
       s == :"," -> {o1,buf1,:","}
       s == :")" -> {o1,buf1,:")"}
       is_func_atom(s) -> parse2([o1],[s],buf1,stream)
-      true -> throw "Error: illegal formula #{o1} #{s}"
+      true -> Elxlog.error("Error: illegal formula ",[o1,s])
     end
   end
   def parse2([o1],[f1],buf,stream) do
     #IO.inspect binding()
     {s,buf1} = read(buf,stream)
     cond do
-      is_func_atom(s) -> throw "Error: illegal formula #{s}"
+      is_func_atom(s) -> Elxlog.error("Error: illegal formula ",[s])
       true -> parse2([s,o1],[f1],buf1,stream)
     end
   end
@@ -149,15 +149,15 @@ defmodule Read do
       s == :")" -> {[:formula,[f1,o2,o1]],buf1,:")"}
       is_func_atom(s) && weight(s)>=weight(f1) -> parse2([[f1,o2,o1]],[s],buf1,stream)
       is_func_atom(s) && weight(s)<weight(f1) -> parse2([o1,o2],[s,f1],buf1,stream)
-      true -> throw "Error: illegal formula #{s}"
+      true -> Elxlog.error("Error: illegal formula ",[s])
     end
   end
   def parse2([o1,o2],[f1,f2],buf,stream) do
     #IO.inspect binding()
     {s,buf1} = read(buf,stream)
     cond do
-      s == :.  -> throw "Error: illegal formula #{f1} #{s}"
-      is_func_atom(s) -> throw "Error: illegal formula #{s}"
+      s == :.  -> Elxlog.error("Error: illegal formula ",[f1,s])
+      is_func_atom(s) -> Elxlog.error("Error: illegal formula ",[s])
       true -> parse2([[f2,o2,[f1,o1,s]]],[],buf1,stream)
     end
   end
@@ -180,6 +180,9 @@ defmodule Read do
   end
   def read(["."|xs],_) do
     {:.,xs}
+  end
+  def read([","|xs],_) do
+    {:",",xs}
   end
   def read([")"|xs],_) do
     {:")",xs}
@@ -426,6 +429,34 @@ defmodule Read do
   def tokenize1([61,46,46|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["=..",token1|res],stream)
+  end
+  def tokenize1([61,61|ls],[],res,stream) do
+    tokenize1(ls,[],["=="|res],stream)
+  end
+  def tokenize1([61,61|ls],token,res,stream) do
+    token1 = token |> Enum.reverse |> List.to_string
+    tokenize1(ls,[],["==",token1|res],stream)
+  end
+  def tokenize1([33,61|ls],[],res,stream) do
+    tokenize1(ls,[],["!="|res],stream)
+  end
+  def tokenize1([3,61|ls],token,res,stream) do
+    token1 = token |> Enum.reverse |> List.to_string
+    tokenize1(ls,[],["!=",token1|res],stream)
+  end
+  def tokenize1([62,61|ls],[],res,stream) do
+    tokenize1(ls,[],[">="|res],stream)
+  end
+  def tokenize1([62,61|ls],token,res,stream) do
+    token1 = token |> Enum.reverse |> List.to_string
+    tokenize1(ls,[],[">=",token1|res],stream)
+  end
+  def tokenize1([60,61|ls],[],res,stream) do
+    tokenize1(ls,[],["<="|res],stream)
+  end
+  def tokenize1([60,61|ls],token,res,stream) do
+    token1 = token |> Enum.reverse |> List.to_string
+    tokenize1(ls,[],["<=",token1|res],stream)
   end
   def tokenize1([61|ls],[],res,stream) do
     tokenize1(ls,[],["="|res],stream)

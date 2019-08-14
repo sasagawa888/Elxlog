@@ -111,6 +111,20 @@ defmodule Elxlog do
   end
   def is_variant(_) do false end
 
+  #Error
+  def error(msg,ls) do
+    IO.write(msg)
+    error1(ls)
+    throw " "
+  end
+
+  def error1([]) do true end
+  def error1([x|xs]) do
+    Print.print1(x)
+    IO.write(" ")
+    error1(xs)
+  end
+
   #for debug
   def stop() do
     raise "debug stop"
