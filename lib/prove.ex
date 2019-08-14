@@ -297,7 +297,7 @@ defmodule Prove do
   end
   def prove_builtin(x,_,_,_,_) do
     IO.inspect(x)
-    throw "Error not exist builtin"
+    throw "Error: not exist builtin"
   end
 
   def eval(x,_) when is_number(x) do x end

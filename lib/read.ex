@@ -427,6 +427,13 @@ defmodule Read do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["=..",token1|res],stream)
   end
+  def tokenize1([61|ls],[],res,stream) do
+    tokenize1(ls,[],["="|res],stream)
+  end
+  def tokenize1([61|ls],token,res,stream) do
+    token1 = token |> Enum.reverse |> List.to_string
+    tokenize1(ls,[],["=",token1|res],stream)
+  end
   def tokenize1([45|ls],[],res,stream) do
     tokenize1(ls,[],["-"|res],stream)
   end
@@ -447,6 +454,9 @@ defmodule Read do
   def tokenize1([47|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
     tokenize1(ls,[],["/",token1|res],stream)
+  end
+  def tokenize1([94|ls],[],res,stream) do
+    tokenize1(ls,[],["^"|res],stream)
   end
   def tokenize1([94|ls],token,res,stream) do
     token1 = token |> Enum.reverse |> List.to_string
