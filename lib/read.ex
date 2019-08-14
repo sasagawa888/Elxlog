@@ -239,7 +239,7 @@ defmodule Read do
       buf = IO.gets("") |> tokenize(stream)
       read_list(buf,ls,stream)
     else
-      throw "Error: read list"
+      Elxlog.error("Error: read list",[])
     end
   end
   defp read_list(["]"|xs],ls,_) do
@@ -271,7 +271,7 @@ defmodule Read do
       buf = IO.gets("") |> tokenize(stream)
       read_tuple(buf,ls,stream)
     else
-      throw "Error: read tuple"
+      Elxlog.error("Error: read tuple",[])
     end
   end
   defp read_tuple([")"|xs],ls,_) do
@@ -515,7 +515,7 @@ defmodule Read do
   end
 
   defp quote_token([],_) do
-    throw "Error: illegal quote"
+    Elxlog.error("Error: illegal quote",[])
   end
   defp quote_token([39|ls],token) do
     atom = token |> Enum.reverse() |> List.to_string()
