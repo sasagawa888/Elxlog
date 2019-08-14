@@ -261,10 +261,6 @@ defmodule Read do
     s = read1(x)
     read_list(xs,ls++[s],stream)
   end
-  defp read_list([x,"]",","|xs],ls,_) do
-    s = read1(x)
-    {ls++[s],xs}
-  end
   defp read_list([x,"]"|xs],ls,_) do
     s = read1(x)
     {ls++[s],xs}
