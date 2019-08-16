@@ -150,7 +150,7 @@ defmodule Prove do
       env1 = unify(a1,make_list(b1),env)
       prove_all(y,env1,def,n+1)
     else
-      throw "Error length #{a1} #{b1}"
+      Elxlog.error("Error: length ",[a1,b1])
     end
     end
   end
@@ -185,7 +185,7 @@ defmodule Prove do
   def prove_builtin([:reconsult,x],y,env,_,n) do
     {status,string} = File.read(Atom.to_string(x))
     if status == :error do
-      throw "Error reconsult"
+      Elxlog.error("Error reconsult",[])
     end
     codelist = String.split(string,"!elixir")
     buf = hd(codelist) |> Read.tokenize(:filein)
@@ -304,7 +304,7 @@ defmodule Prove do
   def eval(x,env) when is_atom(x) do
     x1 = deref(x,env)
     if x == x1 do
-      throw "Error eval ununified #{x}"
+      Elxlog.error("Error: eval ununified ",[x])
     else
       x1
     end
