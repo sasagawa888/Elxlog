@@ -91,6 +91,9 @@ defmodule Read do
     else if s2 == :")" do
       {res++[s1],buf2}
     else if s2 == :"," do
+      if !Elxlog.is_pred(s1) && !Elxlog.is_builtin(s1) do
+        Elxlog.error("Error: expected () ",[s1])
+      end
       parse1(buf2,res++[s1],stream)
     else if is_infix_builtin(s2) do
       {s3,buf3,status} = parse2([],[],buf2,stream)
@@ -264,6 +267,10 @@ defmodule Read do
   defp read_list([x,"]"|xs],ls,_) do
     s = read1(x)
     {ls++[s],xs}
+  end
+  defp read_list(x,_,_) do
+    IO.inspect(x)
+    Elxlog.error("Error: read_list ",[])
   end
 
   defp read_tuple([],ls,stream) do
