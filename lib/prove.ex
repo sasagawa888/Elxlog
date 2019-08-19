@@ -474,6 +474,10 @@ defmodule Prove do
     [:builtin,deref(x,env)]
   end
   def deref([],_) do [] end
+  #edd
+  def deref([x|xs],env) when is_list(x) do
+    [deref(x,env)|deref(xs,env)]
+  end
   def deref([x|xs],env) do
     x1 = deref1(x,env,env)
     if x1 == false do
@@ -534,7 +538,8 @@ defmodule Prove do
       Elxlog.is_anonymous(x1) || Elxlog.is_anonymous(y1) -> unify(xs,ys,env)
       Elxlog.is_var(x1) && !Elxlog.is_var(y1) -> unify(xs,ys,[[x1,y1]|env])
       !Elxlog.is_var(x1) && Elxlog.is_var(y1) -> unify(xs,ys,[[y1,x1]|env])
-      Elxlog.is_var(x1) && Elxlog.is_var(y1) -> unify(xs,ys,[[x1,y1]|env])
+      Elxlog.is_var(x1) && Elxlog.is_var(y1) && older(x1,y1) -> unify(xs,ys,[[x1,y1]|env])
+      Elxlog.is_var(x1) && Elxlog.is_var(y1) && older(y1,x1) -> unify(xs,ys,[[y1,x1]|env])
       x1 == [] && y1 != [] -> false
       x1 != [] && y1 == [] -> false
       is_list(x1) && is_list(y1) -> unify1(x1,y1,xs,ys,env)
@@ -553,6 +558,16 @@ defmodule Prove do
       unify(xs,ys,env1)
     else
       false
+    end
+  end
+
+  #added
+  def older(x,_) when is_atom(x) do true end
+  def older(_,y) when is_atom(y) do false end
+  def older({_,n1},{_,n2}) do
+    cond do
+      n1 < n2 -> true
+      true -> false
     end
   end
 
