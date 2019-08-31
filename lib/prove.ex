@@ -18,15 +18,13 @@ defmodule Prove do
   def prove_pred(_,[],_,env,def,_) do {false,env,def} end
   def prove_pred(x,[d|ds],y,env,def,n) do
     d1 = alpha_conv(d,n)
-    #IO.inspect(d1)
-    #IO.inspect(env)
-    #IO.inspect(y)
-    #IO.gets("??")
+    trace(d1,env,def,n,"try ")
     if Elxlog.is_pred(d1) do
       env1 = unify(x,d1,env)
       if env1 != false do
         {res,env2,def} = prove_all(y,env1,def,n+1)
         if res == true do
+          trace(d1,env2,def,n,"succ")
           {res,env2,def}
         else
           prove_pred(x,ds,y,env,def,n)
@@ -39,13 +37,51 @@ defmodule Prove do
       if env1 != false do
         {res,env2,def} = prove_all(body(d1)++y,env1,def,n+1)
         if res == true do
+          trace(d1,env2,def,n,"succ")
           {res,env2,def}
         else
+          trace(d1,env1,def,n,"fail")
           prove_pred(x,ds,y,env,def,n)
         end
       else
+        trace(d1,env,def,n,"fail")
         prove_pred(x,ds,y,env,def,n)
       end
+    end
+    end
+  end
+
+  def trace(x,env,def,n,action) do
+    if def[:trace] == true do
+      IO.write(n)
+      IO.write(" ")
+      IO.write(action)
+      IO.write(" ")
+      Print.print1(deref(x,env))
+      trace1(env,def)
+    end
+  end
+
+  def trace1(env,def) do
+    msg = IO.gets("")
+    if msg == "\n" do
+      true
+    else if msg == "e\n" do
+      Print.print_env(env)
+      trace1(env,def)
+    else if msg == "l\n" do
+      n = def[:"%last"]
+      IO.write("last clause number is ")
+      IO.puts(n)
+    else if msg == "?\n" do
+      IO.puts("enter -> next prove")
+      IO.puts("e -> print environment")
+      IO.puts("l -> print last clause number")
+      IO.puts("? -> help")
+    else
+      trace1(env,def)
+    end
+    end
     end
     end
   end
@@ -174,6 +210,10 @@ defmodule Prove do
       prove_all(y,env,def,n+1)
     end
   end
+  def prove_builtin([:notrace],y,env,def,n) do
+    def1 = Keyword.put(def,:trace,false)
+    prove_all(y,env,def1,n+1)
+  end
   def prove_builtin([:number,x],y,env,def,n) do
     x1 = deref(x,env)
     if is_number(x1) do
@@ -204,6 +244,10 @@ defmodule Prove do
     else
       {false,env,def}
     end
+  end
+  def prove_builtin([:trace],y,env,def,n) do
+    def1 = Keyword.put(def,:trace,true)
+    prove_all(y,env,def1,n+1)
   end
   def prove_builtin([:true],y,env,def,n) do
     prove_all(y,env,def,n+1)

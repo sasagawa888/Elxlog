@@ -1,5 +1,15 @@
 #----------------print------------
 defmodule Print do
+  def print_env([]) do IO.puts("") end
+  def print_env([[e1,e2]|es]) do
+    IO.write("[")
+    print1(e1)
+    IO.write("->")
+    print1(e2)
+    IO.write("]")
+    print_env(es)
+  end
+
   def print(x) do
     print1(x)
     IO.puts("")
@@ -14,6 +24,13 @@ defmodule Print do
     else
       IO.write("nil")
     end
+  end
+  def print1(x) when is_tuple(x) do
+    {a,n} = x
+    IO.write(a)
+    IO.write("{")
+    IO.write(n)
+    IO.write("}")
   end
   def print1(x) when is_list(x) do
     cond do
@@ -87,6 +104,13 @@ defmodule Print do
     IO.write("|")
     print1(x)
     IO.write("]")
+  end
+  defp print_list1(x) when is_tuple(x) do
+    {a,n} = x
+    IO.write(a)
+    IO.write("{")
+    IO.write(n)
+    IO.write("}")
   end
   defp print_list1([]) do
     IO.write("]")

@@ -12,7 +12,7 @@ defmodule Read do
   end
 
   def is_builtin_str(x) do
-    Enum.member?(["halt","write","nl","is","listing","ask","debug",
+    Enum.member?(["halt","write","nl","is","listing","ask","debug","trace","notrace",
                   "atom","atomic","integer","float","number","reconsult","var","nonvar",
                   "elixir","true","fail","between","not","length","time",
                   ":-",">","<","=>","=<","=..","==","!=","="],x)
