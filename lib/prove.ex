@@ -86,6 +86,24 @@ defmodule Prove do
     end
   end
 
+  def prove_builtin([:append|args],y,env,def,n) do
+    #append([], Xs, Xs).
+    env1 = unify(args,[[],{:Xs,n},{:Xs,n}],env)
+    if env1 != false do
+      if prove_all(y,env1,def,n+1) == true do
+        {true,env,def}
+      end
+    end
+    #append([X | Ls], Ys, [X | Zs]) :- append(Ls, Ys, Zs).
+    env2 = unify(args,[[{:X,n}|{:Ls,n}],{:Ys,n},[{:X,n}|{:Zs,n}]],env)
+    if env2 != false do
+      if prove([:builtin,[:append,{:Ls,n},{:Ys,n},{:Zs,n}]],y,env2,def,n+1) == true do
+        {true,env,def}
+      end
+    end
+
+    {false,env,def}
+  end
 
   def prove_builtin([:ask],y,env,def,n) do
     prove_all(y,env,def,n+1)

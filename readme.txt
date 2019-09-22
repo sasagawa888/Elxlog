@@ -27,6 +27,7 @@ invoke:
 quit: halt().
 
 builtin:
+  append/3
   atom/1
   atomic/1
   integer/1
@@ -76,8 +77,6 @@ likes(robin,cats)
 likes(sandy,X) :- likes(X,cats).
 likes(kim,X) :- likes(X,lee),likes(X,kim).
 likes(X,X)
-append([],Xs,Xs)
-append([X,|Ls],Ys,[X,|Zs]) :- append(Ls,Ys,Zs).
 true
 ?- X is elx_ack(3,11).
 X = 16381
