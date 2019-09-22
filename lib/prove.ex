@@ -224,6 +224,21 @@ defmodule Prove do
     end
     end
   end
+  def prove_builtin([:name,a,b],y,env,def,n) do
+    a1 = deref(a,env)
+    b1 = deref(b,env)
+    if !Elxlog.is_var(a1) && Elxlog.is_var(b1) do
+      env1 = unify(b1,Atom.to_charlist(a),env)
+      prove_all(y,env1,def,n+1)
+    else if Elxlog.is_var(a1) && is_list(b1) do
+      b2 = b1 |> to_string() |> String.to_atom()
+      env1 = unify(a1,b2,env)
+      prove_all(y,env1,def,n+1)
+    else
+      {false,env,def}
+    end
+    end
+  end
   def prove_builtin([:nl],y,env,def,n) do
     IO.puts("")
     prove_all(y,env,def,n+1)
@@ -552,7 +567,6 @@ defmodule Prove do
     [:builtin,deref(x,env)]
   end
   def deref([],_) do [] end
-  #edd
   def deref([x|xs],env) when is_list(x) do
     [deref(x,env)|deref(xs,env)]
   end
