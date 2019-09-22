@@ -44,6 +44,8 @@ builtin:
   between/3
   is/2
   length/2
+  name/2
+  read/1
   =/2
   </2
   >/2

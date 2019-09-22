@@ -285,6 +285,12 @@ defmodule Prove do
     end
     prove_all(y,env,def1,n+1)
   end
+  def prove_builtin([:read,x],y,env,def,n) do
+    x1 = deref(x,env)
+    {s,_} = Read.parse([],:stdin)
+    env1 = unify(x1,s,env)
+    prove_all(y,env1,def,n+1)
+  end
   def prove_builtin([:time,x],y,env,def,n) do
     {time, {res,env1,_}} = :timer.tc(fn() -> prove(x,[],env,def,n) end)
     IO.inspect "time: #{time} micro second"
