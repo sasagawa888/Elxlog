@@ -15,7 +15,7 @@ defmodule Read do
     Enum.member?(["halt","write","nl","is","listing","ask","debug","trace","notrace",
                   "atom","atomic","integer","float","number","reconsult","var","nonvar",
                   "elixir","true","fail","between","not","length","time",
-                  "append",
+                  "append","functor","arg",
                   ":-",">","<","=>","=<","=..","==","!=","="],x)
   end
 

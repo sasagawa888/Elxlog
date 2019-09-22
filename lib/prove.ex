@@ -104,7 +104,16 @@ defmodule Prove do
 
     {false,env,def}
   end
-
+  def prove_builtin([:arg,a,b,c],y,env,def,n) do
+    a1 = deref(a,env)
+    b1 = deref(b,env)
+    [_,[_|arg]] = b1
+    if a1 > length(arg) || a1 <= 0 do
+      Elxlog.error("Error: arg ",a)
+    end
+    env1 = unify(c,Enum.at(arg,a1+1),env)
+    prove_all(y,env1,def,n+1)
+  end
   def prove_builtin([:ask],y,env,def,n) do
     prove_all(y,env,def,n+1)
   end
@@ -169,6 +178,13 @@ defmodule Prove do
     else
       {false,env,def}
     end
+  end
+  def prove_builtin([:functor,a,b,c],y,env,def,n) do
+    a1 = deref(a,env)
+    [_,[name|arg]] = a1
+    env1 = unify(b,name,env)
+    env2 = unify(c,length(arg),env1)
+    prove_all(y,env2,def,n+1)
   end
   def prove_builtin([:halt],_,_,_,_) do
     throw "goodbye"
