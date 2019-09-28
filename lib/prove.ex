@@ -104,6 +104,28 @@ defmodule Prove do
 
     {false,env,def}
   end
+  def prove_builtin([:member|args],y,env,def,n) do
+    #my_member(X, [X | Ls]).
+    env1 = unify(args,[{:X,n},[{:X,n}|{:Ls,n}]],env)
+    if env1 != false do
+      {result,env2,def2} = prove_all(y,env1,def,n+1)
+      if result == true do
+        {true,env2,def2}
+      end
+    end
+    #my_member(X, [Y | Ls]) :- my_member(X, Ls).
+    env2 = unify(args,[{:X,n},[{:Y,n}|{:Ls,n}]],env)
+    if env2 != false do
+      {result,env3,def3} = prove([:builtin,[:member,{:X,n},{:Ls,n}]],y,env2,def,n+1)
+      if result == true do
+        {true,env3,def3}
+      end
+    end
+
+    {false,env,def}
+  end
+
+
   def prove_builtin([:arg,a,b,c],y,env,def,n) do
     a1 = deref(a,env)
     b1 = deref(b,env)
