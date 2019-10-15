@@ -1,6 +1,6 @@
 defmodule Elxlog do
   def repl() do
-    IO.puts("Elxlog ver0.10")
+    IO.puts("Elxlog ver0.11")
     repl1([])
   end
 

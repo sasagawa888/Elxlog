@@ -87,30 +87,34 @@ defmodule Prove do
   end
 
   def prove_builtin([:append|args],y,env,def,n) do
+    try do
     #append([], Xs, Xs).
     env1 = unify(args,[[],{:Xs,n},{:Xs,n}],env)
     if env1 != false do
       if prove_all(y,env1,def,n+1) == true do
-        {true,env,def}
+        throw {true,env,def}
       end
     end
     #append([X | Ls], Ys, [X | Zs]) :- append(Ls, Ys, Zs).
     env2 = unify(args,[[{:X,n}|{:Ls,n}],{:Ys,n},[{:X,n}|{:Zs,n}]],env)
     if env2 != false do
       if prove([:builtin,[:append,{:Ls,n},{:Ys,n},{:Zs,n}]],y,env2,def,n+1) == true do
-        {true,env,def}
+        throw {true,env,def}
       end
     end
-
     {false,env,def}
+    catch
+      x -> x
+    end 
   end
   def prove_builtin([:member|args],y,env,def,n) do
+    try do
     #my_member(X, [X | Ls]).
     env1 = unify(args,[{:X,n},[{:X,n}|{:Ls,n}]],env)
     if env1 != false do
       {result,env2,def2} = prove_all(y,env1,def,n+1)
       if result == true do
-        {true,env2,def2}
+        throw {true,env2,def2}
       end
     end
     #my_member(X, [Y | Ls]) :- my_member(X, Ls).
@@ -118,11 +122,13 @@ defmodule Prove do
     if env2 != false do
       {result,env3,def3} = prove([:builtin,[:member,{:X,n},{:Ls,n}]],y,env2,def,n+1)
       if result == true do
-        {true,env3,def3}
+        throw {true,env3,def3}
       end
     end
-
     {false,env,def}
+    catch
+      x -> x
+    end
   end
 
 
