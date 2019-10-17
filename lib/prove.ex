@@ -105,11 +105,11 @@ defmodule Prove do
     {false,env,def}
     catch
       x -> x
-    end 
+    end
   end
   def prove_builtin([:member|args],y,env,def,n) do
     try do
-    #my_member(X, [X | Ls]).
+    #member(X, [X | Ls]).
     env1 = unify(args,[{:X,n},[{:X,n}|{:Ls,n}]],env)
     if env1 != false do
       {result,env2,def2} = prove_all(y,env1,def,n+1)
@@ -117,7 +117,7 @@ defmodule Prove do
         throw {true,env2,def2}
       end
     end
-    #my_member(X, [Y | Ls]) :- my_member(X, Ls).
+    #member(X, [Y | Ls]) :- member(X, Ls).
     env2 = unify(args,[{:X,n},[{:Y,n}|{:Ls,n}]],env)
     if env2 != false do
       {result,env3,def3} = prove([:builtin,[:member,{:X,n},{:Ls,n}]],y,env2,def,n+1)

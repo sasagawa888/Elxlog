@@ -2,7 +2,7 @@
 
 Small pure Prolog intepreter in Elixir.
 Project is called Elxlog.
-Goal: Fusion of Elixir and Prolog
+Goal is fusion of Elixir and Prolog
 
 ## caution
  - predicate with zero arity is written like this.
@@ -36,22 +36,27 @@ Goal: Fusion of Elixir and Prolog
   append/3
   atom/1
   atomic/1
-  integer/1
-  float/1
-  number/1
-  var/1
-  nonvar/1
-  true/0
-  fail/0
-  not/1
-  write/1
-  nl/0
-  reconsult/1  (['filename.pl'])
   between/3
+  elixir/1  Run the Elixir code. See test.pl (e.g. elixir(elx_in_the_park()) )
+  float/1
+  fail/0
+  halt/0
+  integer/1
   is/2
   length/2
+  listing/1
+  member/2
   name/2
+  nl/0
+  nonvar/1
+  not/1
+  number/1
   read/1
+  reconsult/1  (or ['filename.pl'])
+  time/1
+  true/0
+  var/1
+  write/1
   =/2
   </2
   >/2
@@ -60,11 +65,7 @@ Goal: Fusion of Elixir and Prolog
   !=/2
   ==/2
   =../2
-  halt/0
-  listing/0
-  listing/1
-  time/1
-  elixir/1  Run the Elixir code. See test.pl (e.g. elixir(elx_in_the_park()) )
+
 formula:
   +,^,*,/,^
   prefix "elx_" means Elixir function. See test.pl
