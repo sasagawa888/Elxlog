@@ -12,6 +12,12 @@ defmodule Read do
     end
   end
 
+  @doc"""
+  iex> Read.is_builtin_str("halt")
+  true
+  iex> Read.is_builtin_str("halz")
+  false
+  """
   def is_builtin_str(x) do
     Enum.member?(
       [
@@ -64,6 +70,13 @@ defmodule Read do
     Enum.member?(["+", "-", "*", "/", "^"], x)
   end
 
+  @doc"""
+  if prefix of str is elx_ it is Elixir function fname
+  iex> Read.is_elixir_func_str("elx_foo")
+  true
+  iex> Read.is_elixir_func_str("foo")
+  false
+  """
   def is_elixir_func_str(x) do
     if String.at(x, 0) == "e" && String.at(x, 1) == "l" && String.at(x, 2) == "x" &&
          String.at(x, 3) == "_" do
@@ -73,11 +86,23 @@ defmodule Read do
     end
   end
 
+  @doc"""
+  iex(1)> Read.elixir_name("elx_foo")
+  "foo"
+  """
   def elixir_name(x) do
     {_, name} = String.split_at(x, 4)
     name
   end
 
+  @doc"""
+  if head charactor is upper case it is variable
+  if head charactor is underbar it is variable
+  iex> Read.is_var_str("A")
+  true
+  iex> Read.is_var_str("a")
+  false
+  """
   def is_var_str(x) do
     x1 = String.at(x, 0)
 

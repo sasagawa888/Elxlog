@@ -1,5 +1,21 @@
 # ----------------prove-----------------------------------
 defmodule Prove do
+  @moduledoc """
+  Prove Horn clause with SLD resolution
+  """
+
+  @doc """
+  Return value is tuple. {val,env,def}
+  prove([predicate, y, env, def, n)
+  y is succeeding predicate(s)
+  env is environment. It is keyword-list
+  n is nest level. Alpha conversion uses n to generate new variable.
+  ## example
+  iex>Prove.prove([:builtin,[:true]],[],[],[],0)
+  {true,[],[]}
+  iex>Prove.prove([:builtin,[:fail]],[],[],[],0)
+  {false,[],[]}
+  """
   def prove([:pred, x], y, env, def, n) do
     [name | _] = x
     def1 = def[name]
@@ -10,6 +26,9 @@ defmodule Prove do
     prove_builtin(x, y, env, def, n)
   end
 
+  @doc """
+  prove_all/4 work with prove/5
+  """
   def prove_all([], env, def, _) do
     {true, env, def}
   end
@@ -18,10 +37,19 @@ defmodule Prove do
     prove(x, xs, env, def, n)
   end
 
+  @doc """
+  prove_pred/6 is for predicate
+  x is goal to prove
+  d is set of difinition
+  y is succeeding goals
+  env is environment for variables
+  n is nest lebel
+  """
+  # when d is nil result is fail
   def prove_pred(_, nil, _, env, def, _) do
     {false, env, def}
   end
-
+  # when d is [] result is fail
   def prove_pred(_, [], _, env, def, _) do
     {false, env, def}
   end
@@ -67,6 +95,11 @@ defmodule Prove do
     end
   end
 
+  @doc """
+  when trace is true in def print trace data
+  n is nest lebel
+  action [try,succ,fail]
+  """
   def trace(x, env, def, n, action) do
     if def[:trace] == true do
       IO.write(n)
@@ -106,6 +139,7 @@ defmodule Prove do
     end
   end
 
+  # builtin predicate
   def prove_builtin([:append | args], y, env, def, n) do
     try do
       # append([], Xs, Xs).
@@ -228,11 +262,18 @@ defmodule Prove do
     end
   end
 
+  @doc """
+  system builtin predicate for developer
+  """
   def prove_builtin([:debug], y, env, def, n) do
     debug(def, [])
     prove_all(y, env, def, n + 1)
   end
 
+  @doc """
+  evaluate native Elixir function
+  change from function of elxlog to string. and eval as Elixir function
+  """
   def prove_builtin([:elixir, [:func, x]], y, env, def, n) do
     {x1, _} = deref(x, env) |> func_to_str() |> Code.eval_string([], __ENV__)
 
@@ -561,6 +602,11 @@ defmodule Prove do
     throw("Error: not exist builtin")
   end
 
+  @doc """
+  eval/2 is for is builtin predicate
+  evaluate formula
+  formula  e.g.  [:formula,[:+,x,y]]
+  """
   def eval(x, _) when is_number(x) do
     x
   end
@@ -608,10 +654,17 @@ defmodule Prove do
     deref(x, env)
   end
 
+  @doc """
+  for builtin elixir predicate
+  add prefix "Elxfunc"
+  """
   def func_to_str([name | args]) do
     (["Elxfunc."] ++ [Atom.to_string(name)] ++ [list_to_str(args)]) |> Enum.join()
   end
-
+  @doc """
+  for builtin predicate "elixir"
+  change from elxlog data to string
+  """
   def list_to_str(x) do
     ["("] ++ list_to_str1(x) ++ [")"]
   end
@@ -646,6 +699,10 @@ defmodule Prove do
     ["["] ++ list_to_str1(x) ++ ["]"]
   end
 
+  @doc """
+  for predicate ask/0
+  ask prints variables of goal
+  """
   def ask([], _) do
     true
   end
@@ -663,6 +720,10 @@ defmodule Prove do
     ask(xs, env)
   end
 
+  @doc """
+  for builtin reconsult/1
+  parse file text and add difinition
+  """
   def reconsult([], def) do
     def
   end
@@ -684,6 +745,9 @@ defmodule Prove do
     end
   end
 
+  @doc """
+  for builtin listing/0 /1
+  """
   def listing([], _) do
     true
   end
@@ -710,6 +774,9 @@ defmodule Prove do
     listing1(xs)
   end
 
+  @doc """
+  make list [:_,:_,...] size n
+  """
   def make_list(0) do
     []
   end
@@ -864,11 +931,15 @@ defmodule Prove do
     [alpha_conv(x, n) | alpha_conv(y, n)]
   end
 
+  # unification
   def unify([], [], env) do
     env
   end
-
-  # IO.inspect binding()
+  @doc """
+  unificate x and y
+  env is environment. e.g. [[{:X,1},{:Y,2}],[{:Y,2},3]
+  old variable is always left side in each environment element
+  """
   def unify([x | xs], [y | ys], env) do
     # IO.inspect binding()
     x1 = deref(x, env)
@@ -903,7 +974,6 @@ defmodule Prove do
     end
   end
 
-  # added
   def older(x, _) when is_atom(x) do
     true
   end
