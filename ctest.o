@@ -1,0 +1,117 @@
+defmodule Elxcomp do
+def is_compiled([_, [name | _]]) do
+Enum.member?([:nodiag,:qdelete,:queen_2,:queen,:test,:fact],name)
+end
+def prove_builtin([:nodiag|args],y,env,def,n) do
+try do
+env1= Prove.unify(args,[[],:_,:_],env)
+if env1 != false do
+{result1,_,_} = Prove.prove_all(y,env1,def,n+1)
+if result1 == true do
+throw {true,env,def}
+end
+end
+env2= Prove.unify(args,[[{:N,n}|{:L,n}],{:B,n},{:D,n}],env)
+if env2 != false do
+{result2,_,_} = Prove.prove_all([[:builtin,[:!=,{:D,n},[:formula,[:-,{:N,n},{:B,n}]]]],[:builtin,[:!=,{:D,n},[:formula,[:-,{:B,n},{:N,n}]]]],[:builtin,[:is,{:D1,n},[:formula,[:+,{:D,n},1]]]],[:pred,[:nodiag,{:L,n},{:B,n},{:D1,n}]]] ++ y,env2,def,n+1)
+if result2 == true do
+throw {true,env,def}
+end
+end
+{false,env,def}
+catch
+x -> x
+end
+end
+def prove_builtin([:qdelete|args],y,env,def,n) do
+try do
+env1= Prove.unify(args,[{:A,n},{:A,n},{:L,n},{:L,n}],env)
+if env1 != false do
+{result1,_,_} = Prove.prove_all(y,env1,def,n+1)
+if result1 == true do
+throw {true,env,def}
+end
+end
+env2= Prove.unify(args,[{:X,n},{:A,n},[{:H,n}|{:T,n}],[{:A,n}|{:R,n}]],env)
+if env2 != false do
+{result2,_,_} = Prove.prove_all([[:pred,[:qdelete,{:X,n},{:H,n},{:T,n},{:R,n}]]] ++ y,env2,def,n+1)
+if result2 == true do
+throw {true,env,def}
+end
+end
+{false,env,def}
+catch
+x -> x
+end
+end
+def prove_builtin([:queen_2|args],y,env,def,n) do
+try do
+env1= Prove.unify(args,[[],:_,[]],env)
+if env1 != false do
+{result1,_,_} = Prove.prove_all(y,env1,def,n+1)
+if result1 == true do
+throw {true,env,def}
+end
+end
+env2= Prove.unify(args,[[{:H,n}|{:T,n}],{:History,n},[{:Q,n}|{:M,n}]],env)
+if env2 != false do
+{result2,_,_} = Prove.prove_all([[:pred,[:qdelete,{:Q,n},{:H,n},{:T,n},{:L1,n}]],[:pred,[:nodiag,{:History,n},{:Q,n},1]],[:pred,[:queen_2,{:L1,n},[{:Q,n}|{:History,n}],{:M,n}]]] ++ y,env2,def,n+1)
+if result2 == true do
+throw {true,env,def}
+end
+end
+{false,env,def}
+catch
+x -> x
+end
+end
+def prove_builtin([:queen|args],y,env,def,n) do
+try do
+env1= Prove.unify(args,[{:Data,n},{:Out,n}],env)
+if env1 != false do
+{result1,_,_} = Prove.prove_all([[:pred,[:queen_2,{:Data,n},[],{:Out,n}]]] ++ y,env1,def,n+1)
+if result1 == true do
+throw {true,env,def}
+end
+end
+{false,env,def}
+catch
+x -> x
+end
+end
+def prove_builtin([:test|args],y,env,def,n) do
+try do
+env1= Prove.unify(args,[[]],env)
+if env1 != false do
+{result1,_,_} = Prove.prove_all([[:pred,[:queen,[1,2,3,4,5,6,7,8],{:X,n}]],[:builtin,[:write,{:X,n}]],[:builtin,[:nl,[]]],[:builtin,[:fail,[]]]] ++ y,env1,def,n+1)
+if result1 == true do
+throw {true,env,def}
+end
+end
+{false,env,def}
+catch
+x -> x
+end
+end
+def prove_builtin([:fact|args],y,env,def,n) do
+try do
+env1= Prove.unify(args,[0,1],env)
+if env1 != false do
+{result1,_,_} = Prove.prove_all(y,env1,def,n+1)
+if result1 == true do
+throw {true,env,def}
+end
+end
+env2= Prove.unify(args,[{:N,n},{:A,n}],env)
+if env2 != false do
+{result2,_,_} = Prove.prove_all([[:builtin,[:is,{:N1,n},[:formula,[:-,{:N,n},1]]]],[:pred,[:fact,{:N1,n},{:A1,n}]],[:builtin,[:is,{:A,n},[:formula,[:*,{:N,n},{:A1,n}]]]]] ++ y,env2,def,n+1)
+if result2 == true do
+throw {true,env,def}
+end
+end
+{false,env,def}
+catch
+x -> x
+end
+end
+end

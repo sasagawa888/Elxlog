@@ -152,7 +152,11 @@ defmodule Compile do
   end
 
   def to_elixir(x) when is_atom(x) do
-    "{:" <> Atom.to_string(x) <> ",n}"
+    cond do
+      Elxlog.is_anonymous(x) -> ":_"
+      Elxlog.is_var(x) -> "{:" <> Atom.to_string(x) <> ",n}"
+      true -> ":" <> Atom.to_string(x)
+    end
   end
 
   def to_elixir([:formula, [op | arg]]) do
