@@ -116,3 +116,19 @@ false
 ?- halt().
 goodbye
 ```
+# compiler
+under construction
+
+```
+Elxlog ver0.12
+?- compile('ctest.pl').
+true
+?- ['ctest.o'].
+true
+?- my_member(2,[1,2,3]).
+true
+?- fact(10,X).
+X = 3628800.
+true
+?-
+```

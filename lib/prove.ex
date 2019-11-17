@@ -469,7 +469,7 @@ defmodule Prove do
 
     codelist = String.split(string, "!elixir")
     buf = hd(codelist) |> Read.tokenize(:filein)
-    def1 = reconsult(buf, [])
+    def1 = reconsult(buf, []) |> Enum.reverse()
     # if length(codelist) == 2 do
     #  [_,elixir] = codelist
     #  Code.compile_string(elixir)
