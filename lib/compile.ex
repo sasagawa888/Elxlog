@@ -9,7 +9,7 @@ defmodule Elxcomp do
 end
 
 defmodule Compile do
-  def compile(fname, def) do
+  def compile(fname, def, elixir) do
     [name, _] = fname |> Atom.to_string() |> String.split(".")
     outfile = name <> ".o"
     str = compile1(def)
@@ -17,6 +17,7 @@ defmodule Compile do
     File.write(outfile, is_compiled(def), [:append])
     File.write(outfile, str, [:append])
     File.write(outfile, "end\n", [:append])
+    File.write(outfile, elixir, [:append])
   end
 
   def compile1([]) do

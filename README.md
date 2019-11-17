@@ -121,9 +121,9 @@ under construction
 
 ```
 Elxlog ver0.12
-?- compile('ctest.pl').
+?- compile('test.pl').
 true
-?- ['ctest.o'].
+?- ['test.o'].
 true
 ?- my_member(2,[1,2,3]).
 true

@@ -464,18 +464,21 @@ defmodule Prove do
     {status, string} = File.read(Atom.to_string(x))
 
     if status == :error do
-      Elxlog.error("Error reconsult", [])
+      Elxlog.error("Error compile", [])
     end
 
     codelist = String.split(string, "!elixir")
     buf = hd(codelist) |> Read.tokenize(:filein)
     def1 = reconsult(buf, []) |> Enum.reverse()
-    # if length(codelist) == 2 do
-    #  [_,elixir] = codelist
-    #  Code.compile_string(elixir)
-    # end
-    Compile.compile(x, def1)
-    prove_all(y, env, [], n + 1)
+    if length(codelist) == 2 do
+      [_,elixir] = codelist
+      Compile.compile(x, def1, elixir)
+      prove_all(y, env, [], n + 1)
+    else
+      elixir = ""
+      Compile.compile(x, def1, elixir)
+      prove_all(y, env, [], n + 1)
+    end
   end
 
   def prove_builtin([:read, x], y, env, def, n) do

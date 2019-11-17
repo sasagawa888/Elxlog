@@ -2,6 +2,9 @@
 fact(0,1).
 fact(N,A) :- N1 is N-1,fact(N1,A1),A is N*A1.
 
+my_member(X, [X|_]).
+my_member(X, [_|Y]) :- my_member(X, Y).
+
 likes(kim,robin).
 likes(sandy,lee).
 likes(sandy,kim).
