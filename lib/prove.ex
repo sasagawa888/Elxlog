@@ -441,7 +441,7 @@ defmodule Prove do
       if length(codelist) == 2 do
         [_, elixir] = codelist
         Code.compiler_options(ignore_module_conflict: true)
-        Code.compile_string(elixir)
+        Code.compile_string("defmodule Elxfunc do\n" <> elixir <> "end\n")
       end
 
       prove_all(y, env, def1, n + 1)

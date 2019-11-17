@@ -17,7 +17,9 @@ defmodule Compile do
     File.write(outfile, is_compiled(def), [:append])
     File.write(outfile, str, [:append])
     File.write(outfile, "end\n", [:append])
+    File.write(outfile, "defmodule Elxfunc do\n", [:append])
     File.write(outfile, elixir, [:append])
+    File.write(outfile, "end\n", [:append])
   end
 
   def compile1([]) do
