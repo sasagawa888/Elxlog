@@ -1,4 +1,11 @@
 defmodule Elxcomp do
+  def is_compiled([_, [name | _]]) do
+    Enum.member?([], name)
+  end
+
+  def prove_builtin(_, _, _, _, _) do
+    nil
+  end
 end
 
 defmodule Compile do
@@ -7,6 +14,7 @@ defmodule Compile do
     outfile = name <> ".o"
     str = compile1(def)
     File.write(outfile, "defmodule Elxcomp do\n")
+    File.write(outfile, is_compiled(def), [:append])
     File.write(outfile, str, [:append])
     File.write(outfile, "end\n", [:append])
   end
@@ -16,7 +24,7 @@ defmodule Compile do
   end
 
   def compile1([{name, dt} | dts]) do
-    "def builtin([:" <>
+    "def prove_builtin([:" <>
       Atom.to_string(name) <>
       "|args],y,env,def,n) do\n" <>
       "try do\n" <>
@@ -27,6 +35,22 @@ defmodule Compile do
       "end\n" <>
       "end\n" <>
       compile1(dts)
+  end
+
+  def is_compiled(def) do
+    "def is_compiled([_, [name | _]]) do\n" <>
+      "Enum.member?([" <>
+      is_compiled1(def) <>
+      "],name)\n" <>
+      "end\n"
+  end
+
+  def is_compiled1([{name, _}]) do
+    ":" <> Atom.to_string(name)
+  end
+
+  def is_compiled1([{name, _} | rest]) do
+    ":" <> Atom.to_string(name) <> "," <> is_compiled1(rest)
   end
 
   def comp([], _) do
@@ -45,7 +69,14 @@ defmodule Compile do
       "if env" <>
       Integer.to_string(n) <>
       " != false do\n" <>
-      "if Prove.prove_all(y,env1,def,n+1) == true do\n" <>
+      "{result" <>
+      Integer.to_string(n) <>
+      ",_,_} = Prove.prove_all(y,env" <>
+      Integer.to_string(n) <>
+      ",def,n+1)\n" <>
+      "if result" <>
+      Integer.to_string(n) <>
+      " == true do\n" <>
       "throw {true,env,def}\n" <>
       "end\n" <>
       "end\n"
@@ -56,9 +87,16 @@ defmodule Compile do
       "if env" <>
       Integer.to_string(n) <>
       " != false do\n" <>
-      "if Prove.prove(" <>
+      "{result" <>
+      Integer.to_string(n) <>
+      ",_,_} = Prove.prove_all(" <>
       comp_body(body) <>
-      ",y,env2,def,n+1) == true do\n" <>
+      " ++ y,env" <>
+      Integer.to_string(n) <>
+      ",def,n+1)\n" <>
+      "if result" <>
+      Integer.to_string(n) <>
+      " == true do\n" <>
       "throw {true,env,def}\n" <>
       "end\n" <>
       "end\n"
@@ -77,11 +115,11 @@ defmodule Compile do
   end
 
   def comp_body1([b | bs]) do
-    comp_a_body(b) <> "," <> comp_body(bs)
+    comp_a_body(b) <> "," <> comp_body1(bs)
   end
 
   def comp_a_body([:pred, [name | arg]]) do
-    "[:builtin," <> "[:" <> Atom.to_string(name) <> "," <> arg_to_str(arg) <> "]]"
+    "[:pred," <> "[:" <> Atom.to_string(name) <> "," <> arg_to_str(arg) <> "]]"
   end
 
   def comp_a_body([:builtin, [name | arg]]) do

@@ -17,9 +17,13 @@ defmodule Prove do
   {false,[],[]}
   """
   def prove([:pred, x], y, env, def, n) do
-    [name | _] = x
-    def1 = def[name]
-    prove_pred([:pred, x], def1, y, env, def, n)
+    if Elxcomp.is_compiled([:pred, x]) do
+      Elxcomp.prove_builtin(x, y, env, def, n)
+    else
+      [name | _] = x
+      def1 = def[name]
+      prove_pred([:pred, x], def1, y, env, def, n)
+    end
   end
 
   def prove([:builtin, x], y, env, def, n) do
@@ -49,6 +53,7 @@ defmodule Prove do
   def prove_pred(_, nil, _, env, def, _) do
     {false, env, def}
   end
+
   # when d is [] result is fail
   def prove_pred(_, [], _, env, def, _) do
     {false, env, def}
@@ -146,7 +151,9 @@ defmodule Prove do
       env1 = unify(args, [[], {:Xs, n}, {:Xs, n}], env)
 
       if env1 != false do
-        if prove_all(y, env1, def, n + 1) == true do
+        {result1, _, _} = prove_all(y, env1, def, n + 1)
+
+        if result1 == true do
           throw({true, env, def})
         end
       end
@@ -155,8 +162,13 @@ defmodule Prove do
       env2 = unify(args, [[{:X, n} | {:Ls, n}], {:Ys, n}, [{:X, n} | {:Zs, n}]], env)
 
       if env2 != false do
-        if prove([:builtin, [:append, {:Ls, n}, {:Ys, n}, {:Zs, n}]], y, env2, def, n + 1) == true do
+        {result2, _, _} =
+          prove([:builtin, [:append, {:Ls, n}, {:Ys, n}, {:Zs, n}]], y, env2, def, n + 1)
+
+        if result2 == true do
           throw({true, env, def})
+        else
+          throw({false, env, def})
         end
       end
 
@@ -219,7 +231,7 @@ defmodule Prove do
     ans = IO.gets("")
 
     cond do
-      ans == ".\n" -> prove_all(y, env, def, n + 1)
+      ans == ".\n" -> {true, env, def}
       ans == ";\n" -> {false, env, def}
       true -> prove_all(y, env, def, n + 1)
     end
@@ -428,6 +440,7 @@ defmodule Prove do
 
       if length(codelist) == 2 do
         [_, elixir] = codelist
+        Code.compiler_options(ignore_module_conflict: true)
         Code.compile_string(elixir)
       end
 
@@ -440,6 +453,7 @@ defmodule Prove do
           Elxlog.error("Error reconsult", [])
         end
 
+        Code.compiler_options(ignore_module_conflict: true)
         Code.compile_string(string)
         prove_all(y, env, [], n + 1)
       end
@@ -661,6 +675,7 @@ defmodule Prove do
   def func_to_str([name | args]) do
     (["Elxfunc."] ++ [Atom.to_string(name)] ++ [list_to_str(args)]) |> Enum.join()
   end
+
   @doc """
   for builtin predicate "elixir"
   change from elxlog data to string
@@ -935,6 +950,7 @@ defmodule Prove do
   def unify([], [], env) do
     env
   end
+
   @doc """
   unificate x and y
   env is environment. e.g. [[{:X,1},{:Y,2}],[{:Y,2},3]
