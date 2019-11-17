@@ -126,12 +126,21 @@ defmodule Compile do
     "[:builtin," <> "[:" <> Atom.to_string(name) <> "," <> arg_to_str(arg) <> "]]"
   end
 
+  def arg_to_str([]) do "[]" end
+
   def arg_to_str([a]) do
+    #IO.inspect binding()
     to_elixir(a)
   end
 
-  def arg_to_str([a | as]) do
+  def arg_to_str([a | as]) when is_list(as) do
+    #IO.inspect binding()
     to_elixir(a) <> "," <> arg_to_str(as)
+  end
+
+  def arg_to_str([a | as]) when is_atom(as) do
+    #IO.inspect binding()
+    to_elixir(a) <> "|" <> to_elixir(as)
   end
 
   def to_elixir(x) when is_integer(x) do
@@ -149,4 +158,13 @@ defmodule Compile do
   def to_elixir([:formula, [op | arg]]) do
     "[:formula,[:" <> Atom.to_string(op) <> "," <> arg_to_str(arg) <> "]]"
   end
+
+  def to_elixir(x) when is_list(x) do
+    if x == [] do
+      "[]"
+    else
+      "[" <> arg_to_str(x) <> "]"
+    end
+  end
+
 end
