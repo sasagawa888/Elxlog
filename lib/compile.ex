@@ -129,7 +129,7 @@ defmodule Compile do
     "[:builtin," <> "[:" <> Atom.to_string(name) <> "," <> arg_to_str(arg) <> "]]"
   end
 
-  def arg_to_str([]) do "[]" end
+  def arg_to_str([]) do "" end
 
   def arg_to_str([a]) do
     #IO.inspect binding()
