@@ -167,8 +167,6 @@ defmodule Prove do
 
         if result2 == true do
           throw({true, env, def})
-        else
-          throw({false, env, def})
         end
       end
 
