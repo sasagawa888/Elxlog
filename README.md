@@ -1,6 +1,6 @@
 # Elxlog
 
-Small pure Prolog intepreter in Elixir.
+Small pure Prolog intepreter/compiler in Elixir.
 Project is called Elxlog.
 Goal is fusion of Elixir and Prolog
 
@@ -117,7 +117,6 @@ false
 goodbye
 ```
 # compiler
-under construction
 
 ```
 Elxlog ver0.12
