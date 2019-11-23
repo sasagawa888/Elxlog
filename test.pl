@@ -23,6 +23,17 @@ qsort([X],[X]).
 qsort([X|Xs],Y) :-
   part(X,Xs,S,L),parallel(qsort(S,S1),qsort(L,L1)),my_append(S1,L1,Y).
 
+fib(0,0).
+fib(1,1).
+fib(N,A) :-
+  N1 is N-1,N2 is N-2,
+  fib(N1,A1),fib(N2,A2),A is A1+A2.
+
+pfib(0,0).
+pfib(1,1).
+pfib(N,A) :-
+  N1 is N-1,N2 is N-2,
+  parallel(pfib(N1,A1),pfib(N2,A2)),A is A1+A2.
 
 part(A,[],     [A],[]).
 part(A,[X|Xs],S0,L) :- A>=X,S0=[X|S], part(A,Xs,S,L).
