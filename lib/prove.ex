@@ -1,3 +1,11 @@
+defmodule Worker do
+  def prove_all do
+    receive do
+      {sender, {x, env, def, n}} -> send(sender, {:answer, [x, Prove.prove(x, [], env, def, n)]})
+    end
+  end
+end
+
 # ----------------prove-----------------------------------
 defmodule Prove do
   @moduledoc """
@@ -294,6 +302,22 @@ defmodule Prove do
     end
   end
 
+  def prove_builtin([:parallel | x], y, env, def, n) do
+    if def[:parallel] == false do
+      prove_all(x ++ y, env, def, n)
+    else
+      parallel1(x, env, def, n)
+      x1 = parallel2(length(x), [])
+
+      if Enum.any?(x1, fn x -> x == false end) do
+        {false, env, def}
+      else
+        env1 = flatten_env(x1) ++ env
+        prove_all(y, env1, def, n)
+      end
+    end
+  end
+
   def prove_builtin([:fail], _, env, def, _) do
     {false, env, def}
   end
@@ -468,8 +492,9 @@ defmodule Prove do
     codelist = String.split(string, "!elixir")
     buf = hd(codelist) |> Read.tokenize(:filein)
     def1 = reconsult(buf, []) |> Enum.reverse()
+
     if length(codelist) == 2 do
-      [_,elixir] = codelist
+      [_, elixir] = codelist
       Compile.compile(x, def1, elixir)
       prove_all(y, env, [], n + 1)
     else
@@ -713,6 +738,60 @@ defmodule Prove do
 
   def list_to_str2(x) do
     ["["] ++ list_to_str1(x) ++ ["]"]
+  end
+
+  @doc """
+  help function for parallel/n
+  """
+  def parallel1([], _, _, _) do
+    []
+  end
+
+  def parallel1([x | xs], env, def, n) do
+    pid = spawn(Worker, :prove_all, [])
+    def1 = Keyword.put(def, :parallel, false)
+    send(pid, {self(), {x, env, def1, n}})
+    parallel1(xs, env, def, n)
+  end
+
+  def parallel2(0, res) do
+    res
+  end
+
+  def parallel2(c, res) do
+    receive do
+      {:answer, ls} ->
+        [[_, goal], {result, env, _}] = ls
+
+        if result == false do
+          parallel2(c - 1, [false | res])
+        else
+          env1 = compress_env(goal, env)
+          parallel2(c - 1, [env1 | res])
+        end
+    end
+  end
+
+  def compress_env([], _) do
+    []
+  end
+
+  def compress_env([v | vs], env) do
+    v1 = deref(v, env)
+
+    if Elxlog.is_var(v) do
+      [[v, v1] | compress_env(vs, env)]
+    else
+      compress_env(vs, env)
+    end
+  end
+
+  def flatten_env([]) do
+    []
+  end
+
+  def flatten_env([e | es]) do
+    e ++ flatten_env(es)
   end
 
   @doc """

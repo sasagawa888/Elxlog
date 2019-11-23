@@ -52,6 +52,7 @@ defmodule Read do
         "read",
         "member",
         "compile",
+        "parallel",
         ":-",
         ">",
         "<",

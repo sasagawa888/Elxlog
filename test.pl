@@ -21,7 +21,7 @@ ack(M,N,A) :- A is elx_ack(M,N).
 qsort([],[]).
 qsort([X],[X]).
 qsort([X|Xs],Y) :-
-  part(X,Xs,S,L),qsort(S,S1),qsort(L,L1),my_append(S1,L1,Y).
+  part(X,Xs,S,L),parallel(qsort(S,S1),qsort(L,L1)),my_append(S1,L1,Y).
 
 
 part(A,[],     [A],[]).

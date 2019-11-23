@@ -131,3 +131,8 @@ X = 3628800.
 true
 ?-
 ```
+
+# parallel
+builtin parallel/n
+
+see test.pl qsort
