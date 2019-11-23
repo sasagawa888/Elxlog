@@ -74,13 +74,17 @@ defmodule Compile do
       " != false do\n" <>
       "{result" <>
       Integer.to_string(n) <>
-      ",_,_} = Prove.prove_all(y,env" <>
+      ",env" <>
+      Integer.to_string(n) <>
+      "a,_} = Prove.prove_all(y,env" <>
       Integer.to_string(n) <>
       ",def,n+1)\n" <>
       "if result" <>
       Integer.to_string(n) <>
       " == true do\n" <>
-      "throw {true,env,def}\n" <>
+      "throw {true,env" <>
+      Integer.to_string(n) <>
+      "a,def}\n" <>
       "end\n" <>
       "end\n"
   end
@@ -92,7 +96,9 @@ defmodule Compile do
       " != false do\n" <>
       "{result" <>
       Integer.to_string(n) <>
-      ",_,_} = Prove.prove_all(" <>
+      ",env" <>
+      Integer.to_string(n) <>
+      "a,_} = Prove.prove_all(" <>
       comp_body(body) <>
       " ++ y,env" <>
       Integer.to_string(n) <>
@@ -100,7 +106,9 @@ defmodule Compile do
       "if result" <>
       Integer.to_string(n) <>
       " == true do\n" <>
-      "throw {true,env,def}\n" <>
+      "throw {true,env" <>
+      Integer.to_string(n) <>
+      "a,def}\n" <>
       "end\n" <>
       "end\n"
   end

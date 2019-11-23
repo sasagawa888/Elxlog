@@ -159,10 +159,10 @@ defmodule Prove do
       env1 = unify(args, [[], {:Xs, n}, {:Xs, n}], env)
 
       if env1 != false do
-        {result1, _, _} = prove_all(y, env1, def, n + 1)
+        {result1, env1a, _} = prove_all(y, env1, def, n + 1)
 
         if result1 == true do
-          throw({true, env, def})
+          throw({true, env1a, def})
         end
       end
 
@@ -170,11 +170,11 @@ defmodule Prove do
       env2 = unify(args, [[{:X, n} | {:Ls, n}], {:Ys, n}, [{:X, n} | {:Zs, n}]], env)
 
       if env2 != false do
-        {result2, _, _} =
+        {result2, env2a, _} =
           prove([:builtin, [:append, {:Ls, n}, {:Ys, n}, {:Zs, n}]], y, env2, def, n + 1)
 
         if result2 == true do
-          throw({true, env, def})
+          throw({true, env2a, def})
         end
       end
 
@@ -780,7 +780,11 @@ defmodule Prove do
     v1 = deref(v, env)
 
     if Elxlog.is_var(v) do
-      [[v, v1] | compress_env(vs, env)]
+      if v != v1 do
+        [[v, v1] | compress_env(vs, env)]
+      else
+        [[v, :error] | compress_env(vs, env)]
+      end
     else
       compress_env(vs, env)
     end

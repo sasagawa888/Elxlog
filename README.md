@@ -135,4 +135,4 @@ true
 # parallel
 builtin parallel/n
 
-see test.pl qsort
+see test.pl pqsort/2 and pfib/2
