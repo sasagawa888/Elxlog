@@ -136,3 +136,19 @@ true
 builtin parallel/n
 
 see test.pl pqsort/2 and pfib/2
+
+```
+Elxlog ver0.14
+?- ['test.pl'].
+true
+?- time(fib(15,X)).
+"time: 2790153 micro second"
+X = 610
+true
+?- time(pfib(15,X)).
+"time: 1082117 micro second"
+X = 610
+true
+?-
+
+```
