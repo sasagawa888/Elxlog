@@ -6,7 +6,7 @@ Goal is fusion of Elixir and Prolog
 
 ## caution
  - predicate with zero arity is written like this.
- - e.g. halt()  true()  fail()
+e.g. halt()  true()  fail()
 
  - float number is same as ISO-Prolog e.g. 3.0e4
 
