@@ -23,6 +23,8 @@ e.g. halt()  true()  fail()
  - There is no higher-order predicate such as call/1 assert/1 once/1.
  Within first order predicate logic.
 
+ - Predicates with the same predicate name but different Arity are not allowed.
+
 ## invoke
 
   mix elxlog
