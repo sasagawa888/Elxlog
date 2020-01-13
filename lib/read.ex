@@ -240,12 +240,14 @@ defmodule Read do
   end
 
   # minus number
-  def parse2([], [:-],buf,stream) do
+  def parse2([], [:-], buf, stream) do
     {s, buf1} = read(buf, stream)
+
     if !is_number(s) do
       Elxlog.error("Error: illegal formula2 ", [s])
     end
-    parse2([-1*s],[],buf1,stream)
+
+    parse2([-1 * s], [], buf1, stream)
   end
 
   def parse2([o1], [], buf, stream) do
@@ -266,17 +268,24 @@ defmodule Read do
     {s, buf1} = read(buf, stream)
 
     cond do
-      s == :- -> 
-        {s1, buf2} = read(buf1,stream)
-        parse2([-1*s1, o1],[f1],buf2,stream)
+      s == :- ->
+        {s1, buf2} = read(buf1, stream)
+        parse2([-1 * s1, o1], [f1], buf2, stream)
+
       s == :"(" ->
-        {[_, s1], buf2, term} = parse2([],[],buf1,stream)
+        {[_, s1], buf2, term} = parse2([], [], buf1, stream)
+
         if term != :")" do
           Elxlog.error("Error: illegal formula ()", [s1])
         end
+
         parse2([s1, o1], [f1], buf2, stream)
-      is_func_atom(s) -> Elxlog.error("Error: illegal formula4 ", [s])
-      true -> parse2([s, o1], [f1], buf1, stream)
+
+      is_func_atom(s) ->
+        Elxlog.error("Error: illegal formula4 ", [s])
+
+      true ->
+        parse2([s, o1], [f1], buf1, stream)
     end
   end
 
@@ -299,12 +308,18 @@ defmodule Read do
     {s, buf1} = read(buf, stream)
 
     cond do
-      s == :. -> Elxlog.error("Error: illegal formula6 ", [f1, s])
-      s == :- -> 
-        {s1,buf1} = read(buf1,stream)
-        parse2([[f2, o2, [f1, o1, -1*s1]]], [], buf1, stream)
-      is_func_atom(s) -> Elxlog.error("Error: illegal formula7 ", [s])
-      true -> parse2([[f2, o2, [f1, o1, s]]], [], buf1, stream)
+      s == :. ->
+        Elxlog.error("Error: illegal formula6 ", [f1, s])
+
+      s == :- ->
+        {s1, buf1} = read(buf1, stream)
+        parse2([[f2, o2, [f1, o1, -1 * s1]]], [], buf1, stream)
+
+      is_func_atom(s) ->
+        Elxlog.error("Error: illegal formula7 ", [s])
+
+      true ->
+        parse2([[f2, o2, [f1, o1, s]]], [], buf1, stream)
     end
   end
 
@@ -359,19 +374,19 @@ defmodule Read do
 
   def read([x, "(" | xs], stream) do
     # when x = +-*/^
-    if is_func_str(x) do 
-      {String.to_atom(x),["(" | xs]}
-    # when predicate
+    if is_func_str(x) do
+      {String.to_atom(x), ["(" | xs]}
+      # when predicate
     else
-    {tuple, rest} = read_tuple(xs, [], stream)
+      {tuple, rest} = read_tuple(xs, [], stream)
 
-    cond do
-      is_builtin_str(x) -> {[:builtin, [String.to_atom(x) | tuple]], rest}
-      is_func_str(x) -> {[String.to_atom(x) | tuple], rest}
-      is_elixir_func_str(x) -> {[:func, [String.to_atom(elixir_name(x)) | tuple]], rest}
-      true -> {[:pred, [String.to_atom(x) | tuple]], rest}
+      cond do
+        is_builtin_str(x) -> {[:builtin, [String.to_atom(x) | tuple]], rest}
+        is_func_str(x) -> {[String.to_atom(x) | tuple], rest}
+        is_elixir_func_str(x) -> {[:func, [String.to_atom(elixir_name(x)) | tuple]], rest}
+        true -> {[:pred, [String.to_atom(x) | tuple]], rest}
+      end
     end
-  end
   end
 
   def read([x, "." | xs], _) do

@@ -150,7 +150,6 @@ defmodule ElxlogTest do
     assert capture_io(fn -> Elxlog.bar("nonvar([]).\n") end) == "true\n"
     assert capture_io(fn -> Elxlog.bar("nonvar(1.2).\n") end) == "true\n"
     assert capture_io(fn -> Elxlog.bar("nonvar(1.0e3).\n") end) == "true\n"
-
     assert capture_io(fn -> Elxlog.bar("not(integer(1)).\n") end) == "false\n"
     assert capture_io(fn -> Elxlog.bar("not(integer(1.1)).\n") end) == "true\n"
     assert capture_io(fn -> Elxlog.bar("not(integer([])).\n") end) == "true\n"

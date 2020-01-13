@@ -1,6 +1,6 @@
 defmodule Elxlog do
   def repl() do
-    IO.puts("Elxlog ver0.14")
+    IO.puts("Elxlog ver0.15")
     repl1([])
   end
 
@@ -185,12 +185,11 @@ defmodule Elxlog do
     raise "debug stop"
   end
 
-  #for test
+  # for test
   def bar(str) do
     def = []
-    {s, _} = Read.parse(Read.tokenize(str,:stdin), :stdin)
+    {s, _} = Read.parse(Read.tokenize(str, :stdin), :stdin)
     {s1, _, _} = Prove.prove_all([s], [], def, 1)
     Print.print(s1)
   end
-
 end

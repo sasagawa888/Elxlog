@@ -356,14 +356,17 @@ defmodule Prove do
 
   def prove_builtin([:is, a, b], y, env, def, n) do
     b1 = eval(deref(b, env), env)
+
     if !is_number(b1) do
       Elxlog.error("Error: illegal formula ", [b])
     end
+
     env1 = unify(a, b1, env)
+
     if env1 != false do
       prove_all(y, env1, def, n + 1)
-    else 
-      {false,env,def}
+    else
+      {false, env, def}
     end
   end
 
@@ -385,17 +388,20 @@ defmodule Prove do
       is_list(a1) && Elxlog.is_var(b1) ->
         env1 = unify(length(a1), b, env)
         prove_all(y, env1, def, n + 1)
+
       Elxlog.is_var(a1) && is_integer(b1) ->
         env1 = unify(a1, make_list(b1), env)
         prove_all(y, env1, def, n + 1)
+
       is_list(a1) && is_integer(b1) ->
         if length(a1) == b1 do
           prove_all(y, env, def, n + 1)
-        else 
-          {:false,env,def}
+        else
+          {false, env, def}
         end
+
       true ->
-        {:false,env,def}
+        {false, env, def}
     end
   end
 
@@ -407,16 +413,19 @@ defmodule Prove do
       is_atom(a1) && !Elxlog.is_var(a1) && Elxlog.is_var(b1) ->
         env1 = unify(b1, Atom.to_charlist(a1), env)
         prove_all(y, env1, def, n + 1)
+
       Elxlog.is_var(a1) && is_list(b1) ->
         b2 = b1 |> to_string() |> String.to_atom()
         env1 = unify(a1, b2, env)
         prove_all(y, env1, def, n + 1)
+
       is_atom(a1) && is_list(b1) ->
         b2 = b1 |> to_string() |> String.to_atom()
-        if a1 == b2 do 
+
+        if a1 == b2 do
           prove_all(y, env, def, n + 1)
-        else  
-          {false,env<def}
+        else
+          {false, env < def}
         end
 
       true ->
@@ -706,24 +715,25 @@ defmodule Prove do
   end
 
   def eval([:^, x, y], env) do
-    x1 = eval(x,env)
-    y1 = eval(y,env)
+    x1 = eval(x, env)
+    y1 = eval(y, env)
+
     if is_float(x1) || is_float(y1) || y1 < 0 do
-      :math.pow(x1,y1)
-    else 
-      power(x1,y1)     
-    end 
+      :math.pow(x1, y1)
+    else
+      power(x1, y1)
+    end
   end
 
   def eval(x, env) do
     deref(x, env)
   end
 
-  def power(x,y) do
+  def power(x, y) do
     cond do
       y == 0 -> 1
-      rem(y,2) == 0 -> power(x*x,div(y,2))
-      true -> x * power(x,y-1)   
+      rem(y, 2) == 0 -> power(x * x, div(y, 2))
+      true -> x * power(x, y - 1)
     end
   end
 
