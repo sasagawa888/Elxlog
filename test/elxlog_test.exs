@@ -111,6 +111,21 @@ defmodule ElxlogTest do
   end
 
   test "total" do
+    assert capture_io(fn -> Elxlog.bar("append([1,2,3],[4,5],[1,2,3,4,5]).\n") end) == "true\n"
+    assert capture_io(fn -> Elxlog.bar("append([1,2,3],[4,5],[1,2,3,4,7]).\n") end) == "false\n"
+    assert capture_io(fn -> Elxlog.bar("append([1,2,3],[4,5],X).\n") end) == "true\n"
+    assert capture_io(fn -> Elxlog.bar("append([],[],[]).\n") end) == "true\n"
+    assert capture_io(fn -> Elxlog.bar("append([1,2,3],[4,5],[1,2,3,4,5]).\n") end) == "true\n"
+    assert capture_io(fn -> Elxlog.bar("atom([1,2,3]).\n") end) == "false\n"
+    assert capture_io(fn -> Elxlog.bar("atom(a).\n") end) == "true\n"
+    assert capture_io(fn -> Elxlog.bar("atom(1).\n") end) == "false\n"
+    assert capture_io(fn -> Elxlog.bar("atom(1.1).\n") end) == "false\n"
+    assert capture_io(fn -> Elxlog.bar("atom(X).\n") end) == "false\n"
+    assert capture_io(fn -> Elxlog.bar("atomic([1,2,3]).\n") end) == "false\n"
+    assert capture_io(fn -> Elxlog.bar("atomic(a).\n") end) == "true\n"
+    assert capture_io(fn -> Elxlog.bar("atomic(1).\n") end) == "true\n"
+    assert capture_io(fn -> Elxlog.bar("atomic(1.1).\n") end) == "true\n"
+    assert capture_io(fn -> Elxlog.bar("atomic(X).\n") end) == "false\n"
     assert capture_io(fn -> Elxlog.bar("length([1,2,3],X).\n") end) == "true\n"
     assert capture_io(fn -> Elxlog.bar("length([1,2,3],3).\n") end) == "true\n"
     assert capture_io(fn -> Elxlog.bar("length([1,2,3],4).\n") end) == "false\n"
