@@ -153,38 +153,38 @@ defmodule Read do
     {s1, buf1} = read(buf, stream)
     {s2, buf2} = read(buf1, stream)
 
-    if s2 == :. do
-      if is_atom(s1) do
-        Elxlog.error("Error: parse expected () ", [s1])
-      else
-        if !Elxlog.is_pred(s1) && !Elxlog.is_builtin(s1) do
-          {[:builtin, [:reconsult | s1]], buf2}
-        else
-          {s1, buf2}
+    cond do
+      s2 == :. ->
+        cond do
+          is_atom(s1) ->
+            Elxlog.error("Error: parse expected () ", [s1])
+
+          !Elxlog.is_pred(s1) && !Elxlog.is_builtin(s1) ->
+            {[:builtin, [:reconsult | s1]], buf2}
+
+          true ->
+            {s1, buf2}
         end
-      end
-    else
-      if s2 == :":-" do
+
+      s2 == :":-" ->
         {s3, buf3} = parse1(buf2, [], stream)
         {[:clause, s1, s3], buf3}
-      else
-        if s2 == :"," do
-          {s3, buf3} = parse1(buf2, [s1], stream)
-          {s3, buf3}
-        else
-          if is_infix_builtin(s2) do
-            {s3, buf3, status} = parse2([], [], buf2, stream)
 
-            cond do
-              status == :. -> {[:builtin, [s2, s1, s3]], buf3}
-              status == :"," -> parse1(buf3, [[:builtin, [s2, s1, s3]]], stream)
-              true -> Elxlog.error("Error: illegal delimiter ", [s3, status])
-            end
-          else
-            Elxlog.error("Error: syntax error ", [s1, s2])
-          end
+      s2 == :"," ->
+        {s3, buf3} = parse1(buf2, [s1], stream)
+        {s3, buf3}
+
+      is_infix_builtin(s2) ->
+        {s3, buf3, status} = parse2([], [], buf2, stream)
+
+        cond do
+          status == :. -> {[:builtin, [s2, s1, s3]], buf3}
+          status == :"," -> parse1(buf3, [[:builtin, [s2, s1, s3]]], stream)
+          true -> Elxlog.error("Error: illegal delimiter ", [s3, status])
         end
-      end
+
+      true ->
+        Elxlog.error("Error: syntax error ", [s1, s2])
     end
   end
 
@@ -192,42 +192,45 @@ defmodule Read do
     {s1, buf1} = read(buf, stream)
     {s2, buf2} = read(buf1, stream)
 
-    if s2 == :. do
-      {res ++ [s1], buf2}
-    else
-      if s2 == :")" do
+    cond do
+      s2 == :. ->
         {res ++ [s1], buf2}
-      else
-        if s2 == :"," do
-          if !Elxlog.is_pred(s1) && !Elxlog.is_builtin(s1) do
-            Elxlog.error("Error: expected () ", [s1])
-          end
 
-          parse1(buf2, res ++ [s1], stream)
-        else
-          if is_infix_builtin(s2) do
-            {s3, buf3, status} = parse2([], [], buf2, stream)
+      s2 == :")" ->
+        {res ++ [s1], buf2}
 
-            if status == :"," do
-              parse1(buf3, res ++ [[:builtin, [s2, s1, s3]]], stream)
-            else
-              if status == :. do
-                {res ++ [[:builtin, [s2, s1, s3]]], buf3}
-              else
-                if status == :")" do
-                  {res ++ [[:builtin, [s2, s1, s3]]], buf3}
-                end
-              end
-            end
-          else
-            Elxlog.error("Error illegal body ", [s1, s2])
-          end
+      s2 == :"," ->
+        if !Elxlog.is_pred(s1) && !Elxlog.is_builtin(s1) do
+          Elxlog.error("Error: expected () ", [s1])
         end
-      end
+
+        parse1(buf2, res ++ [s1], stream)
+
+      is_infix_builtin(s2) ->
+        {s3, buf3, status} = parse2([], [], buf2, stream)
+
+        cond do
+          status == :"," ->
+            parse1(buf3, res ++ [[:builtin, [s2, s1, s3]]], stream)
+
+          status == :. ->
+            {res ++ [[:builtin, [s2, s1, s3]]], buf3}
+
+          status == :")" ->
+            {res ++ [[:builtin, [s2, s1, s3]]], buf3}
+        end
+
+      true ->
+        Elxlog.error("Error illegal body ", [s1, s2])
     end
   end
 
   # parse formula
+  # 1st arg operand list
+  # 2nd arg operator list
+  # 3rd arg buffer
+  # 4th arg stream (:sidin or file)
+  # return {value,buffer,last-token}
   def parse2([], [], buf, stream) do
     # IO.inspect binding()
     {s, buf1} = read(buf, stream)
@@ -239,7 +242,7 @@ defmodule Read do
     end
   end
 
-  # minus number
+  # minus number e.g. ["-", 2, ...] -> -2
   def parse2([], [:-], buf, stream) do
     {s, buf1} = read(buf, stream)
 
@@ -276,7 +279,7 @@ defmodule Read do
         {[_, s1], buf2, term} = parse2([], [], buf1, stream)
 
         if term != :")" do
-          Elxlog.error("Error: illegal formula ()", [s1])
+          Elxlog.error("Error: illegal formula paren", [s1])
         end
 
         parse2([s1, o1], [f1], buf2, stream)
@@ -376,7 +379,7 @@ defmodule Read do
     # when x = +-*/^
     if is_func_str(x) do
       {String.to_atom(x), ["(" | xs]}
-      # when predicate
+    # when predicate
     else
       {tuple, rest} = read_tuple(xs, [], stream)
 
