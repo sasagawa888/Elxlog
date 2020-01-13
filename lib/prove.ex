@@ -374,16 +374,21 @@ defmodule Prove do
     a1 = deref(a, env)
     b1 = deref(b, env)
 
-    if is_list(a1) && Elxlog.is_var(b1) do
-      env1 = unify(length(a1), b, env)
-      prove_all(y, env1, def, n + 1)
-    else
-      if Elxlog.is_var(a1) && is_integer(b1) do
+    cond do
+      is_list(a1) && Elxlog.is_var(b1) ->
+        env1 = unify(length(a1), b, env)
+        prove_all(y, env1, def, n + 1)
+      Elxlog.is_var(a1) && is_integer(b1) ->
         env1 = unify(a1, make_list(b1), env)
         prove_all(y, env1, def, n + 1)
-      else
-        Elxlog.error("Error: length ", [a1, b1])
-      end
+      is_list(a1) && is_integer(b1) ->
+        if length(a1) == b1 do
+          prove_all(y, env, def, n + 1)
+        else 
+          {:false,env,def}
+        end
+      true ->
+        {:false,env,def}
     end
   end
 

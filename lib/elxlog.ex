@@ -184,4 +184,13 @@ defmodule Elxlog do
   def stop() do
     raise "debug stop"
   end
+
+  #for test
+  def bar(str) do
+    def = []
+    {s, _} = Read.parse(Read.tokenize(str,:stdin), :stdin)
+    {s1, _, _} = Prove.prove_all([s], [], def, 1)
+    Print.print(s1)
+  end
+
 end

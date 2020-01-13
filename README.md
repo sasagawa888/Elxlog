@@ -8,6 +8,8 @@ Goal is fusion of Elixir and Prolog
  - predicate with zero arity is written like this.
 e.g. halt()  true()  fail()
 
+ - There is no op/3.
+
  - float number is same as ISO-Prolog e.g. 3.0e4
 
  - comma and period is delimiter. Not operator.

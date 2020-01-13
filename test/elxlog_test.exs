@@ -1,6 +1,7 @@
 defmodule ElxlogTest do
   use ExUnit.Case
   doctest Elxlog
+  import ExUnit.CaptureIO
 
   test "deref" do
     env = [
@@ -107,5 +108,11 @@ defmodule ElxlogTest do
              [{:Y, 1}, 2],
              [{:X, 1}, 1]
            ]
+  end
+
+  test "total" do
+    assert capture_io(fn -> Elxlog.bar("length([1,2,3],X).\n") end) == "true\n"
+    assert capture_io(fn -> Elxlog.bar("length([1,2,3],3).\n") end) == "true\n"
+    assert capture_io(fn -> Elxlog.bar("length([1,2,3],4).\n") end) == "false\n"
   end
 end
