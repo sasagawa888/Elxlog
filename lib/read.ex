@@ -233,7 +233,7 @@ defmodule Read do
     {s, buf1} = read(buf, stream)
 
     cond do
-      s == :. -> Elxlog.error("Error: illegal formula ", [s])
+      s == :. -> Elxlog.error("Error: illegal formula1 ", [s])
       is_func_atom(s) -> parse2([], [s], buf1, stream)
       true -> parse2([s], [], buf1, stream)
     end
@@ -243,7 +243,7 @@ defmodule Read do
   def parse2([], [:-],buf,stream) do
     {s, buf1} = read(buf, stream)
     if !is_number(s) do
-      Elxlog.error("Error: illegal formula ", [s])
+      Elxlog.error("Error: illegal formula2 ", [s])
     end
     parse2([-1*s],[],buf1,stream)
   end
@@ -257,7 +257,7 @@ defmodule Read do
       s == :"," -> {o1, buf1, :","}
       s == :")" -> {o1, buf1, :")"}
       is_func_atom(s) -> parse2([o1], [s], buf1, stream)
-      true -> Elxlog.error("Error: illegal formula ", [o1, s])
+      true -> Elxlog.error("Error: illegal formula3 ", [o1, s])
     end
   end
 
@@ -269,7 +269,13 @@ defmodule Read do
       s == :- -> 
         {s1, buf2} = read(buf1,stream)
         parse2([-1*s1, o1],[f1],buf2,stream)
-      is_func_atom(s) -> Elxlog.error("Error: illegal formula ", [s])
+      s == :"(" ->
+        {[_, s1], buf2, term} = parse2([],[],buf1,stream)
+        if term != :")" do
+          Elxlog.error("Error: illegal formula ()", [s1])
+        end
+        parse2([s1, o1], [f1], buf2, stream)
+      is_func_atom(s) -> Elxlog.error("Error: illegal formula4 ", [s])
       true -> parse2([s, o1], [f1], buf1, stream)
     end
   end
@@ -284,7 +290,7 @@ defmodule Read do
       s == :")" -> {[:formula, [f1, o2, o1]], buf1, :")"}
       is_func_atom(s) && weight(s) >= weight(f1) -> parse2([[f1, o2, o1]], [s], buf1, stream)
       is_func_atom(s) && weight(s) < weight(f1) -> parse2([o1, o2], [s, f1], buf1, stream)
-      true -> Elxlog.error("Error: illegal formula ", [s])
+      true -> Elxlog.error("Error: illegal formula5 ", [s])
     end
   end
 
@@ -293,11 +299,11 @@ defmodule Read do
     {s, buf1} = read(buf, stream)
 
     cond do
-      s == :. -> Elxlog.error("Error: illegal formula ", [f1, s])
+      s == :. -> Elxlog.error("Error: illegal formula6 ", [f1, s])
       s == :- -> 
         {s1,buf1} = read(buf1,stream)
         parse2([[f2, o2, [f1, o1, -1*s1]]], [], buf1, stream)
-      is_func_atom(s) -> Elxlog.error("Error: illegal formula ", [s])
+      is_func_atom(s) -> Elxlog.error("Error: illegal formula7 ", [s])
       true -> parse2([[f2, o2, [f1, o1, s]]], [], buf1, stream)
     end
   end
@@ -343,11 +349,20 @@ defmodule Read do
     {:")", xs}
   end
 
+  def read(["(" | xs], _) do
+    {:"(", xs}
+  end
+
   def read(["[" | xs], stream) do
     read_list(xs, [], stream)
   end
 
   def read([x, "(" | xs], stream) do
+    # when x = +-*/^
+    if is_func_str(x) do 
+      {String.to_atom(x),["(" | xs]}
+    # when predicate
+    else
     {tuple, rest} = read_tuple(xs, [], stream)
 
     cond do
@@ -356,6 +371,7 @@ defmodule Read do
       is_elixir_func_str(x) -> {[:func, [String.to_atom(elixir_name(x)) | tuple]], rest}
       true -> {[:pred, [String.to_atom(x) | tuple]], rest}
     end
+  end
   end
 
   def read([x, "." | xs], _) do
