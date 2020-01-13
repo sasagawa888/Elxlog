@@ -356,8 +356,15 @@ defmodule Prove do
 
   def prove_builtin([:is, a, b], y, env, def, n) do
     b1 = eval(deref(b, env), env)
+    if !is_number(b1) do
+      Elxlog.error("Illegal formula ", b)
+    end
     env1 = unify(a, b1, env)
-    prove_all(y, env1, def, n + 1)
+    if env1 != false do
+      prove_all(y, env1, def, n + 1)
+    else 
+      {false,env,def}
+    end
   end
 
   def prove_builtin([:listing], y, env, def, n) do
