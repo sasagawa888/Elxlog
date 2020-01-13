@@ -4,6 +4,18 @@ Small pure Prolog intepreter/compiler in Elixir.
 Project is called Elxlog.
 Goal is fusion of Elixir and Prolog
 
+## install
+make clone or down load zip file
+
+## invoke
+
+  mix elxlog
+
+## quit
+
+ halt().
+
+
 ## caution
  - predicate with zero arity is written like this.
 e.g. halt()  true()  fail()
@@ -28,14 +40,6 @@ e.g. halt()  true()  fail()
  Within first order predicate logic.
 
  - Predicates with the same predicate name but different Arity are not allowed.
-
-## invoke
-
-  mix elxlog
-
-## quit
-
- halt().
 
 ## builtin
 ```
