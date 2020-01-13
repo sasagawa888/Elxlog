@@ -404,7 +404,7 @@ defmodule Prove do
     b1 = deref(b, env)
 
     cond do
-      is_atom(a1) && Elxlog.is_var(b1) ->
+      is_atom(a1) && !Elxlog.is_var(a1) && Elxlog.is_var(b1) ->
         env1 = unify(b1, Atom.to_charlist(a1), env)
         prove_all(y, env1, def, n + 1)
       Elxlog.is_var(a1) && is_list(b1) ->
@@ -706,11 +706,25 @@ defmodule Prove do
   end
 
   def eval([:^, x, y], env) do
-    :math.pow(eval(x, env), eval(y, env))
+    x1 = eval(x,env)
+    y1 = eval(y,env)
+    if is_float(x1) || is_float(y1) do
+      :math.pow(x1,y1)
+    else 
+      power(x1,y1)     
+    end 
   end
 
   def eval(x, env) do
     deref(x, env)
+  end
+
+  def power(x,y) do
+    cond do
+      y == 0 -> 1
+      rem(y,2) == 0 -> power(x*x,div(y,2))
+      true -> x * power(x,y-1)   
+    end
   end
 
   @doc """
