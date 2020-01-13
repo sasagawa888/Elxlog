@@ -403,17 +403,24 @@ defmodule Prove do
     a1 = deref(a, env)
     b1 = deref(b, env)
 
-    if !Elxlog.is_var(a1) && Elxlog.is_var(b1) do
-      env1 = unify(b1, Atom.to_charlist(a), env)
-      prove_all(y, env1, def, n + 1)
-    else
-      if Elxlog.is_var(a1) && is_list(b1) do
+    cond do
+      is_atom(a1) && Elxlog.is_var(b1) ->
+        env1 = unify(b1, Atom.to_charlist(a1), env)
+        prove_all(y, env1, def, n + 1)
+      Elxlog.is_var(a1) && is_list(b1) ->
         b2 = b1 |> to_string() |> String.to_atom()
         env1 = unify(a1, b2, env)
         prove_all(y, env1, def, n + 1)
-      else
+      is_atom(a1) && is_list(b1) ->
+        b2 = b1 |> to_string() |> String.to_atom()
+        if a1 == b2 do 
+          prove_all(y, env, def, n + 1)
+        else  
+          {false,env<def}
+        end
+
+      true ->
         {false, env, def}
-      end
     end
   end
 
