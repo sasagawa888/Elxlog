@@ -239,6 +239,15 @@ defmodule Read do
     end
   end
 
+  # minus number
+  def parse2([], [:-],buf,stream) do
+    {s, buf1} = read(buf, stream)
+    if !is_number(s) do
+      Elxlog.error("Error: illegal formula ", [s])
+    end
+    parse2([-1*s],[],buf1,stream)
+  end
+
   def parse2([o1], [], buf, stream) do
     # IO.inspect binding()
     {s, buf1} = read(buf, stream)
@@ -257,6 +266,9 @@ defmodule Read do
     {s, buf1} = read(buf, stream)
 
     cond do
+      s == :- -> 
+        {s1, buf2} = read(buf1,stream)
+        parse2([-1*s1, o1],[f1],buf2,stream)
       is_func_atom(s) -> Elxlog.error("Error: illegal formula ", [s])
       true -> parse2([s, o1], [f1], buf1, stream)
     end
@@ -282,6 +294,9 @@ defmodule Read do
 
     cond do
       s == :. -> Elxlog.error("Error: illegal formula ", [f1, s])
+      s == :- -> 
+        {s1,buf1} = read(buf1,stream)
+        parse2([[f2, o2, [f1, o1, -1*s1]]], [], buf1, stream)
       is_func_atom(s) -> Elxlog.error("Error: illegal formula ", [s])
       true -> parse2([[f2, o2, [f1, o1, s]]], [], buf1, stream)
     end

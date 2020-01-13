@@ -221,7 +221,7 @@ defmodule Prove do
     [_, [_ | arg]] = b1
 
     if a1 > length(arg) || a1 <= 0 do
-      Elxlog.error("Error: arg ", a)
+      Elxlog.error("Error: arg ", [a])
     end
 
     env1 = unify(c, Enum.at(arg, a1 + 1), env)
@@ -357,7 +357,7 @@ defmodule Prove do
   def prove_builtin([:is, a, b], y, env, def, n) do
     b1 = eval(deref(b, env), env)
     if !is_number(b1) do
-      Elxlog.error("Illegal formula ", b)
+      Elxlog.error("Error: illegal formula ", [b])
     end
     env1 = unify(a, b1, env)
     if env1 != false do
@@ -472,7 +472,7 @@ defmodule Prove do
       {status, string} = File.read(fname)
 
       if status == :error do
-        Elxlog.error("Error reconsult", [])
+        Elxlog.error("Error: reconsult", [])
       end
 
       codelist = String.split(string, "!elixir")
@@ -491,7 +491,7 @@ defmodule Prove do
         {status, string} = File.read(fname)
 
         if status == :error do
-          Elxlog.error("Error reconsult", [])
+          Elxlog.error("Error: reconsult", [])
         end
 
         Code.compiler_options(ignore_module_conflict: true)
@@ -505,7 +505,7 @@ defmodule Prove do
     {status, string} = File.read(Atom.to_string(x))
 
     if status == :error do
-      Elxlog.error("Error compile", [])
+      Elxlog.error("Error: compile", [])
     end
 
     codelist = String.split(string, "!elixir")
@@ -708,7 +708,7 @@ defmodule Prove do
   def eval([:^, x, y], env) do
     x1 = eval(x,env)
     y1 = eval(y,env)
-    if is_float(x1) || is_float(y1) do
+    if is_float(x1) || is_float(y1) || y1 < 0 do
       :math.pow(x1,y1)
     else 
       power(x1,y1)     
