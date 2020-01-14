@@ -1,11 +1,32 @@
 # ---------------read----------------------------------
 defmodule Read do
-  # lowercase or number char or underbar
+  @moduledoc """
+  main function is parse/2
+  parse/2 recieve string from stdio or file 
+  and return listed predicate or clause data
+  {return_val, buffer}
+  """
+
+  @doc """
+  lowercase or number char or underbar
+  iex> Read.is_atom_str("asdf")
+  true
+  iex> Read.is_atom_str("asdf123")
+  true
+  iex> Read.is_atom_str("asdf_abc")
+  true
+  iex> Read.is_atom_str("Asdf")
+  false
+  """
   def is_atom_str(x) do
     y = String.to_charlist(x)
 
     if hd(y) >= 97 && hd(y) <= 122 &&
-         Enum.all?(y, fn z -> (z >= 97 && z <= 122) || (z >= 48 && z <= 57) || z == 95 end) do
+         Enum.all?(y, fn z ->
+           (z >= 97 && z <= 122) ||
+             (z >= 48 && z <= 57) ||
+             z == 95
+         end) do
       true
     else
       false
@@ -99,9 +120,9 @@ defmodule Read do
   @doc """
   if head charactor is upper case it is variable
   if head charactor is underbar it is variable
-  iex> Read.is_var_str("A")
+  iex> Read.is_var_str("Abc")
   true
-  iex> Read.is_var_str("a")
+  iex> Read.is_var_str("abc")
   false
   """
   def is_var_str(x) do
@@ -148,7 +169,13 @@ defmodule Read do
   def is_infix_builtin(x) do
     Enum.member?([:is, :=, :"=..", :==, :>=, :<=, :>, :<, :^, :==, :!=], x)
   end
-
+  @doc """
+  parse/2 is main function in Read module
+  1st arg is tokenized list data e.g. ["1","+","2"]
+  2nd arg is :sidio or file 
+  return lited predicate ot clause data 
+  {return_val,buffer}
+  """
   def parse(buf, stream) do
     {s1, buf1} = read(buf, stream)
     {s2, buf2} = read(buf1, stream)
@@ -342,6 +369,12 @@ defmodule Read do
     50
   end
 
+  @doc """
+  read one unit operator, operand, predicate
+  e.g. :+  2 [:foo,1,2]
+  1st arg is tokenized list
+  2nd arg is streawm :stdio or file
+  """
   def read([], stream) do
     if stream == :stdin do
       buf = IO.gets("") |> tokenize(stream)
@@ -379,7 +412,7 @@ defmodule Read do
     # when x = +-*/^
     if is_func_str(x) do
       {String.to_atom(x), ["(" | xs]}
-    # when predicate
+      # when predicate
     else
       {tuple, rest} = read_tuple(xs, [], stream)
 
@@ -428,7 +461,13 @@ defmodule Read do
     end
   end
 
-  defp read_list([], ls, stream) do
+  @doc """
+  1st arg is tokenized buffer list
+  2nd arg is return value
+  3rd arg is stream :stdin or file
+  return {return_val,buffer}
+  """
+  def read_list([], ls, stream) do
     if stream == :stdin do
       buf = IO.gets("") |> tokenize(stream)
       read_list(buf, ls, stream)
@@ -437,36 +476,36 @@ defmodule Read do
     end
   end
 
-  defp read_list(["]" | xs], ls, _) do
+  def read_list(["]" | xs], ls, _) do
     {ls, xs}
   end
 
-  defp read_list(["[" | xs], ls, stream) do
+  def read_list(["[" | xs], ls, stream) do
     {s, rest} = read_list(xs, [], stream)
     read_list(rest, ls ++ [s], stream)
   end
 
-  defp read_list(["" | xs], ls, stream) do
+  def read_list(["" | xs], ls, stream) do
     read_list(xs, ls, stream)
   end
 
-  defp read_list([x, "|" | xs], ls, stream) do
+  def read_list([x, "|" | xs], ls, stream) do
     s = read1(x)
     {s1, rest} = read_list(xs, [], stream)
     {ls ++ [s] ++ hd(s1), rest}
   end
 
-  defp read_list([x, "," | xs], ls, stream) do
+  def read_list([x, "," | xs], ls, stream) do
     s = read1(x)
     read_list(xs, ls ++ [s], stream)
   end
 
-  defp read_list([x, "]" | xs], ls, _) do
+  def read_list([x, "]" | xs], ls, _) do
     s = read1(x)
     {ls ++ [s], xs}
   end
 
-  defp read_list(x, _, _) do
+  def read_list(x, _, _) do
     IO.inspect(x)
     Elxlog.error("Error: read_list ", [])
   end
@@ -560,7 +599,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], [token1 | res], stream)
   end
-
+  # left paren
   def tokenize1([40 | ls], [], res, stream) do
     tokenize1(ls, [], ["(" | res], stream)
   end
@@ -569,7 +608,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["(", token1 | res], stream)
   end
-
+  #right paren
   def tokenize1([41 | ls], [], res, stream) do
     tokenize1(ls, [], [")" | res], stream)
   end
@@ -578,7 +617,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], [")", token1 | res], stream)
   end
-
+  # left bracket
   def tokenize1([91 | ls], [], res, stream) do
     tokenize1(ls, [], ["[" | res], stream)
   end
@@ -587,7 +626,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["[", token1 | res], stream)
   end
-
+  #right bracket
   def tokenize1([93 | ls], [], res, stream) do
     tokenize1(ls, [], ["]" | res], stream)
   end
@@ -596,7 +635,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["]", token1 | res], stream)
   end
-
+  # virtical bar |
   def tokenize1([124 | ls], [], res, stream) do
     tokenize1(ls, [], ["|" | res], stream)
   end
@@ -605,7 +644,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["|", token1 | res], stream)
   end
-
+  # comma ,
   def tokenize1([44 | ls], [], res, stream) do
     tokenize1(ls, [], ["," | res], stream)
   end
@@ -614,33 +653,34 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], [",", token1 | res], stream)
   end
-
+  # piriod .
+  #buffer is empty
+  #when after period is LF or CR and stream is :stdin, it end of string
+  #when stream is :filein continue tokenize 
   def tokenize1([46 | ls], [], res, stream) do
-    if (ls == [10] || ls == [13]) && stream == :stdin do
-      Enum.reverse(["." | res])
-    else
-      if (hd(ls) == 10 || hd(ls) == 13) && stream == :filein do
+    cond do
+      (ls == [10] || ls == [13]) && stream == :stdin ->
+         Enum.reverse(["." | res])
+      (hd(ls) == 10 || hd(ls) == 13) && stream == :filein ->
         tokenize1(ls, [], ["." | res], stream)
-      else
+      true ->
         tokenize1(ls, [46], res, stream)
-      end
     end
   end
-
+  #buffer is not empty
   def tokenize1([46 | ls], token, res, stream) do
-    if (ls == [10] || ls == [13]) && stream == :stdin do
-      token1 = token |> Enum.reverse() |> List.to_string()
-      Enum.reverse([".", token1 | res])
-    else
-      if (hd(ls) == 10 || hd(ls) == 13) && stream == :filein do
+    cond do
+      (ls == [10] || ls == [13]) && stream == :stdin ->
+        token1 = token |> Enum.reverse() |> List.to_string()
+        Enum.reverse([".", token1 | res])
+      (hd(ls) == 10 || hd(ls) == 13) && stream == :filein ->
         token1 = token |> Enum.reverse() |> List.to_string()
         tokenize1(ls, [], [".", token1 | res], stream)
-      else
+      true ->
         tokenize1(ls, [46 | token], res, stream)
-      end
     end
   end
-
+  # +
   def tokenize1([43 | ls], [], res, stream) do
     tokenize1(ls, [], ["+" | res], stream)
   end
@@ -649,7 +689,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["+", token1 | res], stream)
   end
-
+  # :-
   def tokenize1([58, 45 | ls], [], res, stream) do
     tokenize1(ls, [], [":-" | res], stream)
   end
@@ -658,7 +698,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], [":-", token1 | res], stream)
   end
-
+  # =..
   def tokenize1([61, 46, 46 | ls], [], res, stream) do
     tokenize1(ls, [], ["=.." | res], stream)
   end
@@ -667,7 +707,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["=..", token1 | res], stream)
   end
-
+  # ==
   def tokenize1([61, 61 | ls], [], res, stream) do
     tokenize1(ls, [], ["==" | res], stream)
   end
@@ -676,7 +716,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["==", token1 | res], stream)
   end
-
+  # !=
   def tokenize1([33, 61 | ls], [], res, stream) do
     tokenize1(ls, [], ["!=" | res], stream)
   end
@@ -685,7 +725,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["!=", token1 | res], stream)
   end
-
+  # >=
   def tokenize1([62, 61 | ls], [], res, stream) do
     tokenize1(ls, [], [">=" | res], stream)
   end
@@ -694,7 +734,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], [">=", token1 | res], stream)
   end
-
+  # >
   def tokenize1([62 | ls], [], res, stream) do
     tokenize1(ls, [], [">" | res], stream)
   end
@@ -703,7 +743,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], [">", token1 | res], stream)
   end
-
+  # <=
   def tokenize1([60, 61 | ls], [], res, stream) do
     tokenize1(ls, [], ["<=" | res], stream)
   end
@@ -712,7 +752,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["<=", token1 | res], stream)
   end
-
+  # <
   def tokenize1([60 | ls], [], res, stream) do
     tokenize1(ls, [], ["<" | res], stream)
   end
@@ -721,7 +761,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["<", token1 | res], stream)
   end
-
+  # =
   def tokenize1([61 | ls], [], res, stream) do
     tokenize1(ls, [], ["=" | res], stream)
   end
@@ -730,7 +770,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["=", token1 | res], stream)
   end
-
+  # -
   def tokenize1([45 | ls], [], res, stream) do
     tokenize1(ls, [], ["-" | res], stream)
   end
@@ -739,7 +779,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["-", token1 | res], stream)
   end
-
+  # *
   def tokenize1([42 | ls], [], res, stream) do
     tokenize1(ls, [], ["*" | res], stream)
   end
@@ -748,7 +788,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["*", token1 | res], stream)
   end
-
+  # /
   def tokenize1([47 | ls], [], res, stream) do
     tokenize1(ls, [], ["/" | res], stream)
   end
@@ -757,7 +797,7 @@ defmodule Read do
     token1 = token |> Enum.reverse() |> List.to_string()
     tokenize1(ls, [], ["/", token1 | res], stream)
   end
-
+  # ^
   def tokenize1([94 | ls], [], res, stream) do
     tokenize1(ls, [], ["^" | res], stream)
   end
@@ -812,7 +852,16 @@ defmodule Read do
     quote_token(ls, [l | token])
   end
 
-  defp is_integer_str(x) do
+  @doc """
+  + - is separated by tokenizer, thus + - is meaningless
+  iex>Read.is_integer_str("123")
+  true
+  iex>Read.is_integer_str("+123")
+  true
+  iex>Read.is_integer_str("-123")
+  true
+  """
+  def is_integer_str(x) do
     cond do
       x == "" ->
         false
@@ -840,7 +889,15 @@ defmodule Read do
     end
   end
 
-  defp is_float_str(x) do
+  @doc """
+  iex>Read.is_float_str("123")
+  false
+  iex>Read.is_float_str("123.45")
+  true
+  iex>Read.is_float_str("3.0e1")
+  true
+  """
+  def is_float_str(x) do
     y = String.split(x, ".")
     z = String.split(x, "e")
 
