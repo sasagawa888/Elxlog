@@ -105,6 +105,14 @@ defmodule Elxlog do
     false
   end
 
+  def is_compound(x) do
+    cond do
+      is_pred(x) -> true
+      is_builtin(x) -> true
+      true -> false
+    end
+  end
+
   def is_formula([:formula, _]) do
     true
   end

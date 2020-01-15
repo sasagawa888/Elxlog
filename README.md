@@ -44,6 +44,7 @@ e.g. halt()  true()  fail()
 ## builtin
 ```
   append/3
+  arg/3
   atom/1
   atomic/1
   between/3

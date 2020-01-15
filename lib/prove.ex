@@ -218,14 +218,24 @@ defmodule Prove do
   def prove_builtin([:arg, a, b, c], y, env, def, n) do
     a1 = deref(a, env)
     b1 = deref(b, env)
-    [_, [_ | arg]] = b1
-
-    if a1 > length(arg) || a1 <= 0 do
-      Elxlog.error("Error: arg ", [a])
+    if !Elxlog.is_compound(b1) do
+      Elxlog.error("Error: arg not compound", [b])
     end
 
-    env1 = unify(c, Enum.at(arg, a1 + 1), env)
-    prove_all(y, env1, def, n + 1)
+    [_, [_ | arg]] = b1
+    cond do
+      !is_integer(a1) ->
+        Elxlog.error("Error: arg not in domain ", [a1])
+      a1 > length(arg) || a1 <= 0 ->
+        Elxlog.error("Error: arg not in domain ", [a1])
+      true -> nil
+    end 
+    env1 = unify(c, Enum.at(arg, a1 - 1), env)
+    if env1 != false do
+      prove_all(y, env1, def, n + 1)
+    else
+      {false,env,def}
+    end
   end
 
   def prove_builtin([:ask], y, env, def, n) do
