@@ -120,7 +120,7 @@ defmodule Elxlog do
   def is_formula(_) do
     false
   end
-  
+
   def is_var(x) do
     if (is_atomvar(x) && !is_anonymous(x)) || is_variant(x) do
       true

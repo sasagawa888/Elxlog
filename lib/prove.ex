@@ -218,23 +218,30 @@ defmodule Prove do
   def prove_builtin([:arg, a, b, c], y, env, def, n) do
     a1 = deref(a, env)
     b1 = deref(b, env)
+
     if !Elxlog.is_compound(b1) do
       Elxlog.error("Error: arg not compound", [b])
     end
 
     [_, [_ | arg]] = b1
+
     cond do
       !is_integer(a1) ->
         Elxlog.error("Error: arg not in domain ", [a1])
+
       a1 > length(arg) || a1 <= 0 ->
         Elxlog.error("Error: arg not in domain ", [a1])
-      true -> nil
-    end 
+
+      true ->
+        nil
+    end
+
     env1 = unify(c, Enum.at(arg, a1 - 1), env)
+
     if env1 != false do
       prove_all(y, env1, def, n + 1)
     else
-      {false,env,def}
+      {false, env, def}
     end
   end
 
@@ -344,30 +351,36 @@ defmodule Prove do
 
   def prove_builtin([:functor, a, b, c], y, env, def, n) do
     a1 = deref(a, env)
-    b1 = deref(b,env)
-    c1 = deref(c,env)
-    
-    cond do 
+    b1 = deref(b, env)
+    c1 = deref(c, env)
+
+    cond do
       Elxlog.is_compound(a1) ->
         [_, [name | arg]] = a1
         env1 = unify(b, name, env)
         env2 = unify(c, length(arg), env1)
-        if env1 != false && env2 != false do 
+
+        if env1 != false && env2 != false do
           prove_all(y, env2, def, n + 1)
         else
-          {false,env,def}
-        end 
+          {false, env, def}
+        end
+
       Elxlog.is_var(a1) && (is_atom(b1) && !Elxlog.is_var(b1)) && is_integer(c1) ->
-        env1 = unify(a, [:pred,[b1|make_list(c1)]], env)
+        env1 = unify(a, [:pred, [b1 | make_list(c1)]], env)
         prove_all(y, env1, def, n + 1)
+
       Elxlog.is_compound(a1) && (is_atom(b1) && !Elxlog.is_var(b1)) && is_integer(c1) ->
         [_, [name | arg]] = a1
+
         if name == b1 && length(arg) == c1 do
           prove_all(y, env, def, n + 1)
         else
-          {false,env,def}
+          {false, env, def}
         end
-      true -> {false,env,def}
+
+      true ->
+        {false, env, def}
     end
   end
 
