@@ -120,6 +120,8 @@ defmodule ElxlogTest do
     assert capture_io(fn -> Elxlog.bar("arg(3,foo(1,2,3),3).\n") end) == "true\n"
     assert capture_io(fn -> Elxlog.bar("arg(3,foo(1,2,3),X).\n") end) == "true\n"
     assert capture_io(fn -> Elxlog.bar("arg(3,foo(1,2,3),2).\n") end) == "false\n"
+    assert capture_io(fn -> Elxlog.bar("functor(foo(1,2,3),X,Y).\n") end) == "true\n"
+    assert capture_io(fn -> Elxlog.bar("functor(foo(1,2,3),foo,3).\n") end) == "true\n"
     assert capture_io(fn -> Elxlog.bar("atom([1,2,3]).\n") end) == "false\n"
     assert capture_io(fn -> Elxlog.bar("atom(a).\n") end) == "true\n"
     assert capture_io(fn -> Elxlog.bar("atom(1).\n") end) == "false\n"

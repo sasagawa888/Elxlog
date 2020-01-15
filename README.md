@@ -51,6 +51,7 @@ e.g. halt()  true()  fail()
   elixir/1  Run the Elixir code. See test.pl (e.g. elixir(elx_in_the_park()) )
   float/1
   fail/0
+  functor/3
   halt/0
   integer/1
   is/2

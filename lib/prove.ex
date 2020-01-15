@@ -344,10 +344,31 @@ defmodule Prove do
 
   def prove_builtin([:functor, a, b, c], y, env, def, n) do
     a1 = deref(a, env)
-    [_, [name | arg]] = a1
-    env1 = unify(b, name, env)
-    env2 = unify(c, length(arg), env1)
-    prove_all(y, env2, def, n + 1)
+    b1 = deref(b,env)
+    c1 = deref(c,env)
+    
+    cond do 
+      Elxlog.is_compound(a1) ->
+        [_, [name | arg]] = a1
+        env1 = unify(b, name, env)
+        env2 = unify(c, length(arg), env1)
+        if env1 != false && env2 != false do 
+          prove_all(y, env2, def, n + 1)
+        else
+          {false,env,def}
+        end 
+      Elxlog.is_var(a1) && (is_atom(b1) && !Elxlog.is_var(b1)) && is_integer(c1) ->
+        env1 = unify(a, [:pred,[b1|make_list(c1)]], env)
+        prove_all(y, env1, def, n + 1)
+      Elxlog.is_compound(a1) && (is_atom(b1) && !Elxlog.is_var(b1)) && is_integer(c1) ->
+        [_, [name | arg]] = a1
+        if name == b1 && length(arg) == c1 do
+          prove_all(y, env, def, n + 1)
+        else
+          {false,env,def}
+        end
+      true -> {false,env,def}
+    end
   end
 
   def prove_builtin([:halt], _, _, _, _) do
