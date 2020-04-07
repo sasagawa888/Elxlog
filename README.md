@@ -85,7 +85,7 @@ formula:
 
 ## Example
 ```
-mix prolog
+mix elxlog
 Compiling 1 file (.ex)
 Elxlog ver0.XX
 ?- ['test.pl'].
