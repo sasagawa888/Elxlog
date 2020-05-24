@@ -1,6 +1,8 @@
 # ---------------read----------------------------------
 defmodule Read do
   @moduledoc """
+  Read module is input functions of Elxlog.
+
   main function is parse/2
   parse/2 recieve string from stdio or file 
   and return listed predicate or clause data
@@ -880,7 +882,7 @@ defmodule Read do
   end
 
   @doc """
-  + - is separated by tokenizer, thus + - is meaningless
+  atom + - is separated by tokenizer, thus + - is meaningless
   iex>Read.is_integer_str("123")
   true
   iex>Read.is_integer_str("+123")

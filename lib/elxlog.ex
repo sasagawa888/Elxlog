@@ -1,4 +1,8 @@
 defmodule Elxlog do
+  @moduledoc """
+  Elxlog is main module of Elxlog
+  """
+  
   def repl() do
     IO.puts("Elxlog ver0.15")
     repl1([])
@@ -178,22 +182,28 @@ defmodule Elxlog do
     throw(" ")
   end
 
-  def error1([]) do
+  defp error1([]) do
     true
   end
 
-  def error1([x | xs]) do
+  defp error1([x | xs]) do
     Print.print1(x)
     IO.write(" ")
     error1(xs)
   end
 
   # for debug
+  @doc"""
+  for debug
+  """
   def stop() do
     raise "debug stop"
   end
 
   # for test
+  @doc"""
+  for test
+  """
   def bar(str) do
     def = []
     {s, _} = Read.parse(Read.tokenize(str, :stdin), :stdin)

@@ -1,4 +1,7 @@
 defmodule Elxcomp do
+  @moduledoc """
+  generated compiled code
+  """
   def is_compiled([_, [name | _]]) do
     Enum.member?([], name)
   end
@@ -9,6 +12,10 @@ defmodule Elxcomp do
 end
 
 defmodule Compile do
+  @moduledoc """
+  Compile module include compiler of Elxlog
+  """
+
   def compile(fname, def, elixir) do
     [name, _] = fname |> Atom.to_string() |> String.split(".")
     outfile = name <> ".o"

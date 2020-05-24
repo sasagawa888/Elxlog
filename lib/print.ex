@@ -1,5 +1,9 @@
 # ----------------print------------
 defmodule Print do
+  @moduledoc """
+  Print module is output functions for Elxlog
+  """
+
   def print_env([]) do
     IO.puts("")
   end
