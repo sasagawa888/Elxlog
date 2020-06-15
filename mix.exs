@@ -4,7 +4,7 @@ defmodule Elxlog.MixProject do
   def project do
     [
       app: :elxlog,
-      version: "0.1.5",
+      version: "0.1.6",
       elixir: "~> 1.4",
       description: "Prolog interpreter/compiler in Elixir",
       start_permanent: Mix.env() == :prod,
@@ -15,7 +15,7 @@ defmodule Elxlog.MixProject do
       start_permanent: Mix.env() == :prod,
       docs: [
         # The main page in the docs
-        # main: "Elxlog",
+        main: "readme",
         extras: ["README.md"]
       ],
       package: [
